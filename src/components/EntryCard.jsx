@@ -33,43 +33,47 @@ function Badge({ label, colors }) {
 function PosterArea({ entry, posterUrl }) {
   const [imgError,  setImgError]  = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
-  const showReal = posterUrl && !imgError
+  const showReal = !!posterUrl && !imgError
 
   return (
     <div
-      className={`relative w-full aspect-[2/3] rounded-xl overflow-hidden transition-all duration-300 ${
+      className={`relative w-full aspect-[2/3] rounded-xl overflow-hidden ${
         entry.watched ? 'ring-1 ring-primary/40' : ''
       }`}
       style={{ boxShadow: entry.watched ? '0 4px 24px rgba(230,36,41,0.18)' : 'none' }}
     >
-      {/* Generated poster — always rendered, hidden when real poster loads */}
-      <div className={`absolute inset-0 transition-opacity duration-300 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
+      {/* Generated poster — always the base layer */}
+      <div className={`absolute inset-0 transition-opacity duration-500 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
         <GeneratedPoster entry={entry} watched={entry.watched} />
       </div>
 
-      {/* Real TMDB poster on top if available */}
+      {/* Real poster fades in on top */}
       {showReal && (
-        <>
-          {!imgLoaded && <div className="absolute inset-0 shimmer z-10" />}
-          <img
-            src={posterUrl}
-            alt={entry.title}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 z-20 ${
-              imgLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setImgError(true)}
-          />
-        </>
+        <img
+          src={posterUrl}
+          alt={entry.title}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            imgLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
+        />
+      )}
+
+      {/* Watched checkmark (over everything) */}
+      {entry.watched && imgLoaded && (
+        <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
+          <CheckCircle size={14} className="text-white" />
+        </div>
       )}
     </div>
   )
 }
 
 export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
-  const typeColors     = TYPE_COLORS[entry.type]      || TYPE_COLORS.Movie
+  const typeColors     = TYPE_COLORS[entry.type]         || TYPE_COLORS.Movie
   const universeColors = UNIVERSE_COLORS[entry.universe] || UNIVERSE_COLORS.MCU
-  const phaseColor     = PHASE_COLORS[entry.phase]   || '#6B7280'
+  const phaseColor     = PHASE_COLORS[entry.phase]       || '#6B7280'
   const hours          = (entry.runtime / 60).toFixed(1)
 
   return (
@@ -86,7 +90,6 @@ export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
       {entry.watched && (
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none z-0" />
       )}
-
       <div className="relative z-10 p-2.5">
         <PosterArea entry={entry} posterUrl={posterUrl} />
 
@@ -108,9 +111,8 @@ export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
               }
             </button>
           </div>
-
           <div className="flex flex-wrap gap-1">
-            <Badge label={entry.type} colors={typeColors} />
+            <Badge label={entry.type}  colors={typeColors} />
             <Badge label={entry.phase} colors={{ bg: `${phaseColor}20`, text: phaseColor, border: `${phaseColor}40` }} />
           </div>
           <Badge label={entry.universe} colors={universeColors} />
