@@ -13,6 +13,7 @@ import StatsView from './components/StatsView'
 import Achievements from './components/Achievements'
 import AchievementNotification from './components/AchievementNotification'
 import ConfettiOverlay from './components/ConfettiOverlay'
+import HeroEffect, { getHeroEffect } from './components/HeroEffect'
 
 function PosterLoadingBar({ loading, progress }) {
   if (!loading) return null
@@ -48,6 +49,7 @@ export default function App() {
   const [activeTab, setActiveTab]                       = useState('dashboard')
   const [notifQueue, setNotifQueue]                     = useState([])
   const [showConfetti, setShowConfetti]                 = useState(false)
+  const [heroEffect, setHeroEffect]                     = useState(null)   // { type: string }
   const brandNewDayShown                                = useRef(false)
 
   const { getPoster, loading: posterLoading, progress } = useWikiPosters()
@@ -56,7 +58,15 @@ export default function App() {
 
   const handleToggle = useCallback((id) => {
     setWatchedIds(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      const isWatching = !prev.includes(id)
+      const next = isWatching ? [...prev, id] : prev.filter(x => x !== id)
+
+      if (isWatching) {
+        const entry = ENTRIES.find(e => e.id === id)
+        const effectType = getHeroEffect(entry)
+        setHeroEffect({ type: effectType, key: Date.now() })
+      }
+
       if (next.includes(83) && !brandNewDayShown.current) {
         brandNewDayShown.current = true
         setTimeout(() => setShowConfetti(true), 400)
@@ -95,6 +105,16 @@ export default function App() {
 
       <AchievementNotification queue={notifQueue} onDismiss={dismissNotif} />
       <ConfettiOverlay show={showConfetti} onClose={() => setShowConfetti(false)} />
+
+      <AnimatePresence>
+        {heroEffect && (
+          <HeroEffect
+            key={heroEffect.key}
+            effectType={heroEffect.type}
+            onDone={() => setHeroEffect(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
