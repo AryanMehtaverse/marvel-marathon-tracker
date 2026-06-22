@@ -48,7 +48,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                     />
                   )}
                   <Icon size={14} className="relative z-10 flex-shrink-0" />
-                  <span className="relative z-10 hidden sm:block">{tab.label}</span>
+                  <span className="relative z-10 text-xs sm:text-sm">{tab.label}</span>
                 </button>
               )
             })}

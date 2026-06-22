@@ -1,129 +1,131 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// ── Hero config ─────────────────────────────────────────────────────────────
 const HERO_CONFIGS = {
   spider: {
     particles: ['🕷️', '🕸️', '🕷️'],
-    color:  '#E63946',
-    label:  'THWIP!',
-    web:    true,
+    color: '#E63946',
+    label: 'THWIP!',
+    web: true,
   },
   thor: {
     particles: ['🔨', '⚡', '🌩️', '🔨', '⚡', '🌩️'],
-    color:  '#1A56DB',
-    label:  'BY ODIN\'S BEARD!',
+    color: '#1A56DB',
+    label: "BY ODIN'S BEARD!",
   },
   ironman: {
     particles: ['🔴', '⚡', '💛', '🔴', '⚡'],
-    color:  '#E62429',
-    label:  'I AM IRON MAN',
-    ring:   true,
+    color: '#E62429',
+    label: 'I AM IRON MAN',
+    ring: true,
   },
   cap: {
     particles: ['🛡️', '⭐', '🛡️', '⭐', '🔵'],
-    color:  '#1D4ED8',
-    label:  'I CAN DO THIS ALL DAY.',
+    color: '#1D4ED8',
+    label: 'I CAN DO THIS ALL DAY.',
   },
   hulk: {
     particles: ['💚', '💥', '👊', '💚', '💥'],
-    color:  '#16A34A',
-    label:  'HULK SMASH!',
+    color: '#16A34A',
+    label: 'HULK SMASH!',
   },
   deadpool: {
     particles: ['🗡️', '💥', '❤️', '🌮', '💥', '🗡️'],
-    color:  '#DC2626',
-    label:  'MAXIMUM EFFORT!',
+    color: '#DC2626',
+    label: 'MAXIMUM EFFORT!',
   },
   panther: {
     particles: ['💜', '⚫', '🐾', '💜', '⚫'],
-    color:  '#7C3AED',
-    label:  'WAKANDA FOREVER!',
+    color: '#7C3AED',
+    label: 'WAKANDA FOREVER!',
   },
   groot: {
-    particles: ['🌱', '🍃', '🌿', '🌱', '🍃', '⭐'],
-    color:  '#65A30D',
-    label:  'I AM GROOT!',
+    particles: ['🌿', '🍃', '🌱', '⭐', '🌿'],
+    color: '#65A30D',
+    label: 'I AM GROOT!',
+  },
+  guardians: {
+    particles: ['🌟', '🎵', '⭐', '🎶', '🌌'],
+    color: '#8B5CF6',
+    label: 'WE ARE THE GUARDIANS!',
   },
   strange: {
     particles: ['✨', '🌀', '💫', '✨', '🌀', '⭕'],
-    color:  '#F59E0B',
-    label:  'BY THE VISHANTI!',
+    color: '#F59E0B',
+    label: 'BY THE VISHANTI!',
   },
   xmen: {
     particles: ['💛', '⚡', '🔱', '💛', '⚡'],
-    color:  '#F59E0B',
-    label:  'MUTANT AND PROUD!',
+    color: '#F59E0B',
+    label: 'MUTANT AND PROUD!',
   },
   wolverine: {
     particles: ['💛', '🔱', '⚡', '💛', '🔱'],
-    color:  '#F59E0B',
-    label:  'THE BEST THERE IS.',
-    claws:  true,
+    color: '#F59E0B',
+    label: 'THE BEST THERE IS.',
+    claws: true,
   },
   antman: {
     particles: ['🐜', '🐜', '🔬', '🐜', '⚡'],
-    color:  '#DC2626',
-    label:  'GOING SUBATOMIC!',
+    color: '#DC2626',
+    label: 'GOING SUBATOMIC!',
   },
   loki: {
     particles: ['💚', '🗡️', '👑', '✨', '💚'],
-    color:  '#16A34A',
-    label:  'GLORIOUS PURPOSE!',
+    color: '#16A34A',
+    label: 'GLORIOUS PURPOSE!',
   },
   widow: {
     particles: ['🕸️', '🔴', '⌛', '🕸️', '🔴'],
-    color:  '#DC2626',
-    label:  'WHATEVER IT TAKES.',
+    color: '#DC2626',
+    label: 'WHATEVER IT TAKES.',
   },
   daredevil: {
     particles: ['🔴', '🎯', '⚖️', '🔴', '🎯'],
-    color:  '#DC2626',
-    label:  "HELL'S KITCHEN NEVER SLEEPS.",
+    color: '#DC2626',
+    label: "HELL'S KITCHEN NEVER SLEEPS.",
   },
   avengers: {
     particles: ['⭐', '💥', '🌟', '✨', '💥'],
-    color:  '#E62429',
-    label:  'AVENGERS ASSEMBLE!',
-  },
-  guardians: {
-    particles: ['🌟', '🎵', '🌱', '⭐', '🎶'],
-    color:  '#8B5CF6',
-    label:  'WE ARE THE GUARDIANS!',
+    color: '#E62429',
+    label: 'AVENGERS ASSEMBLE!',
   },
   wanda: {
     particles: ['🔴', '✨', '💫', '🔴', '✨'],
-    color:  '#DC2626',
-    label:  'CHAOS MAGIC!',
+    color: '#DC2626',
+    label: 'CHAOS MAGIC!',
   },
   hawkeye: {
     particles: ['🏹', '🎯', '🏹', '🎯', '⭐'],
-    color:  '#7C3AED',
-    label:  "NEVER MISS.",
+    color: '#7C3AED',
+    label: 'NEVER MISS.',
   },
   marvel: {
     particles: ['⭐', '✨', '💫', '🌟', '⭐'],
-    color:  '#E62429',
-    label:  'EXCELSIOR!',
+    color: '#E62429',
+    label: 'EXCELSIOR!',
   },
 }
 
-// ── Determine which hero effect to show based on entry ──────────────────────
 export function getHeroEffect(entry) {
   if (!entry) return 'marvel'
   const t = (entry.title + ' ' + (entry.universe || '')).toLowerCase()
 
-  if (t.includes('spider-man') || t.includes('spider man') || t.includes('spider-verse') || entry.universe === 'Sony Spider-Man' || entry.universe === 'Spider-Verse') return 'spider'
+  if (t.includes('spider-man') || t.includes('spider man') || t.includes('spider-verse') ||
+      entry.universe === 'Sony Spider-Man' || entry.universe === 'Spider-Verse') return 'spider'
   if (t.includes('thor') || t.includes('love and thunder') || t.includes('dark world')) return 'thor'
   if (t.includes('iron man') || t.includes('iron-man')) return 'ironman'
-  if (t.includes('captain america') || t.includes('brave new world') || t.includes('first avenger') || t.includes('winter soldier') || t.includes('civil war')) return 'cap'
+  if (t.includes('captain america') || t.includes('brave new world') || t.includes('first avenger') ||
+      t.includes('winter soldier') || t.includes('civil war')) return 'cap'
   if (t.includes('hulk') || t.includes('incredible hulk')) return 'hulk'
   if (t.includes('deadpool')) return 'deadpool'
   if (t.includes('black panther') || t.includes('wakanda')) return 'panther'
-  if (t.includes('guardians') || t.includes('groot')) return 'groot'
-  if (t.includes('doctor strange') || t.includes('dr. strange') || t.includes('multiverse of madness')) return 'strange'
+  if (t.includes('guardians') || t.includes('holiday special')) return 'guardians'
+  if (t.includes('groot')) return 'groot'
+  if (t.includes('doctor strange') || t.includes('multiverse of madness')) return 'strange'
   if (t.includes('logan') || t.includes('wolverine') || t.includes('x-men origins')) return 'wolverine'
-  if (t.includes('x-men') || t.includes('x men') || t.includes('apocalypse') || t.includes('dark phoenix') || t.includes('new mutants')) return 'xmen'
+  if (t.includes('x-men') || t.includes('x men') || t.includes('apocalypse') ||
+      t.includes('dark phoenix') || t.includes('new mutants') || t.includes('x2') || t.includes('first class')) return 'xmen'
   if (t.includes('ant-man') || t.includes('ant man') || t.includes('quantumania')) return 'antman'
   if (t.includes('loki')) return 'loki'
   if (t.includes('black widow') || t.includes('natasha')) return 'widow'
@@ -134,77 +136,68 @@ export function getHeroEffect(entry) {
   return 'marvel'
 }
 
-// ── Spider Web SVG ──────────────────────────────────────────────────────────
+// ── Spider Web ───────────────────────────────────────────────────────────────
+// Web always drawn from (0,0) going right+down in SVG space.
+// CSS transform on the wrapper div flips it to the correct screen corner.
 function SpiderWeb({ corner, delay }) {
   const NUM_LINES = 9
   const NUM_RINGS = 5
-  const SPREAD    = 90   // degrees
-  const MAX_LEN   = 420
-
-  const [tl, tr, bl, br] = [
-    corner === 'tl', corner === 'tr', corner === 'bl', corner === 'br',
-  ]
-
-  // Base angle: direction the web fans out from this corner
-  const baseAngle = tl ? 0 : tr ? 90 : bl ? 270 : 180
+  const MAX_LEN   = 380
 
   const angles = Array.from({ length: NUM_LINES }, (_, i) =>
-    ((baseAngle + (SPREAD / (NUM_LINES - 1)) * i) * Math.PI) / 180
+    (i / (NUM_LINES - 1)) * (Math.PI / 2)   // 0° → 90°
   )
 
-  const originX = tr || br ? 0 : 0
-  const originY = 0
+  const cssTransform = {
+    tl: 'none',
+    tr: 'scaleX(-1)',
+    bl: 'scaleY(-1)',
+    br: 'scale(-1,-1)',
+  }[corner]
 
-  // Map angle to screen direction
-  const getPoint = (angle, dist) => ({
-    x: Math.cos(angle) * dist,
-    y: Math.sin(angle) * dist,
-  })
+  const transformOrigin = {
+    tl: '0 0',
+    tr: '100% 0',
+    bl: '0 100%',
+    br: '100% 100%',
+  }[corner]
 
   const pos = {
-    top:    tl || tr ? 0    : 'auto',
-    bottom: bl || br ? 0    : 'auto',
-    left:   tl || bl ? 0    : 'auto',
-    right:  tr || br ? 0    : 'auto',
+    top:    corner.startsWith('t') ? 0 : 'auto',
+    bottom: corner.startsWith('b') ? 0 : 'auto',
+    left:   corner.endsWith('l')   ? 0 : 'auto',
+    right:  corner.endsWith('r')   ? 0 : 'auto',
   }
 
-  const flipX = tr || br
-  const flipY = bl || br
-
   return (
-    <svg
-      className="absolute w-72 h-72 sm:w-96 sm:h-96 pointer-events-none"
-      style={pos}
-      viewBox="-400 -400 400 400"
-      overflow="visible"
+    <div
+      className="absolute w-64 h-64 sm:w-80 sm:h-80 pointer-events-none"
+      style={{ ...pos, transform: cssTransform, transformOrigin }}
     >
-      <g transform={`scale(${flipX ? -1 : 1}, ${flipY ? -1 : 1})`}>
-        {/* Radial lines */}
-        {angles.map((angle, i) => {
-          const p = getPoint(angle, MAX_LEN)
-          return (
-            <motion.line
-              key={`l${i}`}
-              x1="0" y1="0" x2={p.x} y2={p.y}
-              stroke="rgba(255,255,255,0.5)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              exit={{ pathLength: 0, opacity: 0 }}
-              transition={{ duration: 0.55, delay: delay + i * 0.04, ease: 'easeOut' }}
-            />
-          )
-        })}
+      <svg viewBox="0 0 380 380" className="w-full h-full" overflow="visible">
+        {/* Radial lines from origin */}
+        {angles.map((angle, i) => (
+          <motion.line
+            key={`l${i}`}
+            x1="0" y1="0"
+            x2={Math.cos(angle) * MAX_LEN}
+            y2={Math.sin(angle) * MAX_LEN}
+            stroke="rgba(255,255,255,0.5)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            exit={{ pathLength: 0, opacity: 0 }}
+            transition={{ duration: 0.55, delay: delay + i * 0.04, ease: 'easeOut' }}
+          />
+        ))}
 
-        {/* Concentric arc segments connecting radial lines */}
+        {/* Concentric ring segments */}
         {Array.from({ length: NUM_RINGS }, (_, ri) => {
-          const r = ((ri + 1) / NUM_RINGS) * MAX_LEN * 0.85
-          const pts = angles.map(a => getPoint(a, r))
-          const d = pts.reduce(
-            (acc, pt, i) => acc + (i === 0 ? `M ${pt.x} ${pt.y}` : ` L ${pt.x} ${pt.y}`),
-            ''
-          )
+          const r   = ((ri + 1) / NUM_RINGS) * MAX_LEN * 0.85
+          const pts = angles.map(a => ({ x: Math.cos(a) * r, y: Math.sin(a) * r }))
+          const d   = pts.reduce((acc, pt, i) =>
+            acc + (i === 0 ? `M ${pt.x} ${pt.y}` : ` L ${pt.x} ${pt.y}`), '')
           return (
             <motion.path
               key={`r${ri}`}
@@ -219,12 +212,12 @@ function SpiderWeb({ corner, delay }) {
             />
           )
         })}
-      </g>
-    </svg>
+      </svg>
+    </div>
   )
 }
 
-// ── Claw Slash ──────────────────────────────────────────────────────────────
+// ── Wolverine Claw Slash ─────────────────────────────────────────────────────
 function ClawSlash({ delay }) {
   const slashes = [
     { x1: '35%', y1: '20%', x2: '55%', y2: '85%' },
@@ -249,12 +242,11 @@ function ClawSlash({ delay }) {
   )
 }
 
-// ── Arc Reactor Ring ────────────────────────────────────────────────────────
+// ── Iron Man Arc Rings ───────────────────────────────────────────────────────
 function ArcRing({ delay }) {
-  const rings = [80, 130, 180, 230]
   return (
     <svg className="absolute inset-0 w-full h-full pointer-events-none">
-      {rings.map((r, i) => (
+      {[80, 140, 200, 260].map((r, i) => (
         <motion.circle
           key={r}
           cx="50%" cy="50%" r={r}
@@ -262,8 +254,8 @@ function ArcRing({ delay }) {
           stroke="#E62429"
           strokeWidth="2"
           initial={{ scale: 0, opacity: 0.8 }}
-          animate={{ scale: [0, 1.5], opacity: [0.8, 0] }}
-          transition={{ duration: 0.8, delay: delay + i * 0.12, ease: 'easeOut' }}
+          animate={{ scale: [0, 1.4], opacity: [0.8, 0] }}
+          transition={{ duration: 0.9, delay: delay + i * 0.12, ease: 'easeOut' }}
           style={{ transformOrigin: '50% 50%' }}
         />
       ))}
@@ -271,30 +263,30 @@ function ArcRing({ delay }) {
   )
 }
 
-// ── Floating Particle ────────────────────────────────────────────────────────
-function Particle({ emoji, index, total }) {
-  const startX = Math.random() * 90 + 5
-  const targetX = startX + (Math.random() - 0.5) * 25
-  const delay = Math.random() * 0.4
-  const size = 28 + Math.floor(Math.random() * 20)
-  const spin = (Math.random() - 0.5) * 720
+// ── Falling Particle ─────────────────────────────────────────────────────────
+function Particle({ emoji }) {
+  const startX = Math.random() * 88 + 4
+  const size   = 26 + Math.floor(Math.random() * 22)
+  const delay  = Math.random() * 0.45
+  const spin   = (Math.random() - 0.5) * 720
+  const drift  = (Math.random() - 0.5) * 130
 
   return (
     <motion.div
       className="absolute select-none pointer-events-none"
-      style={{ left: `${startX}%`, top: '-5%', fontSize: size }}
+      style={{ left: `${startX}%`, top: '-6%', fontSize: size }}
       initial={{ y: 0, x: 0, opacity: 1, rotate: 0 }}
       animate={{
-        y: ['0vh', '110vh'],
-        x: [`0px`, `${(Math.random() - 0.5) * 120}px`],
+        y: ['0vh', '112vh'],
+        x: [0, drift],
         opacity: [0, 1, 1, 0],
         rotate: spin,
       }}
       transition={{
-        duration: 1.6 + Math.random() * 0.8,
+        duration: 1.5 + Math.random() * 0.9,
         delay,
         ease: 'easeIn',
-        times: [0, 0.1, 0.75, 1],
+        times: [0, 0.08, 0.75, 1],
       }}
     >
       {emoji}
@@ -302,20 +294,20 @@ function Particle({ emoji, index, total }) {
   )
 }
 
-// ── Label Flash ──────────────────────────────────────────────────────────────
+// ── Hero Label ───────────────────────────────────────────────────────────────
 function HeroLabel({ label, color }) {
   return (
     <motion.div
       className="absolute inset-0 flex items-center justify-center pointer-events-none"
       initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: [0, 1, 1, 0], scale: [0.5, 1.15, 1, 0.9] }}
-      transition={{ duration: 1.6, times: [0, 0.15, 0.6, 1], ease: 'easeOut' }}
+      animate={{ opacity: [0, 1, 1, 0], scale: [0.5, 1.1, 1, 0.95] }}
+      transition={{ duration: 1.7, times: [0, 0.12, 0.6, 1], ease: 'easeOut' }}
     >
       <span
-        className="text-4xl sm:text-5xl font-black tracking-widest text-center px-6 drop-shadow-2xl"
+        className="text-3xl sm:text-5xl font-black tracking-widest text-center px-6 drop-shadow-2xl"
         style={{
           color: 'white',
-          textShadow: `0 0 30px ${color}, 0 0 60px ${color}80, 2px 2px 0 rgba(0,0,0,0.8)`,
+          textShadow: `0 0 30px ${color}, 0 0 60px ${color}80, 2px 2px 0 rgba(0,0,0,0.9)`,
           fontFamily: 'Arial Black, Impact, sans-serif',
         }}
       >
@@ -328,35 +320,30 @@ function HeroLabel({ label, color }) {
 // ── Main Export ──────────────────────────────────────────────────────────────
 export default function HeroEffect({ effectType, onDone }) {
   const config = HERO_CONFIGS[effectType] || HERO_CONFIGS.marvel
-  const isSpider = config.web
-  const isWolverine = config.claws
-  const isIronMan = config.ring
 
-  // Build particle list: use 20-ish particles
-  const particleCount = 22
-  const particles = Array.from({ length: particleCount }, (_, i) => ({
+  const particles = Array.from({ length: 22 }, (_, i) => ({
     emoji: config.particles[i % config.particles.length],
-    key: i,
+    key:   i,
   }))
 
   useEffect(() => {
-    const t = setTimeout(onDone, 2600)
+    const t = setTimeout(onDone, 2700)
     return () => clearTimeout(t)
   }, [onDone])
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-none overflow-hidden">
-      {/* Coloured vignette flash */}
+      {/* Vignette flash */}
       <motion.div
         className="absolute inset-0"
-        style={{ background: `radial-gradient(ellipse at center, ${config.color}22 0%, transparent 70%)` }}
+        style={{ background: `radial-gradient(ellipse at center, ${config.color}25 0%, transparent 70%)` }}
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 1, 0] }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.9 }}
       />
 
-      {/* Spider webs from all four corners */}
-      {isSpider && (
+      {/* Spider webs from all four corners — now correct for tr/br */}
+      {config.web && (
         <>
           <SpiderWeb corner="tl" delay={0}    />
           <SpiderWeb corner="tr" delay={0.08} />
@@ -365,18 +352,11 @@ export default function HeroEffect({ effectType, onDone }) {
         </>
       )}
 
-      {/* Wolverine claw slashes */}
-      {isWolverine && <ClawSlash delay={0.1} />}
+      {config.claws && <ClawSlash delay={0.1} />}
+      {config.ring  && <ArcRing  delay={0.05} />}
 
-      {/* Iron Man arc rings */}
-      {isIronMan && <ArcRing delay={0.05} />}
+      {particles.map(p => <Particle key={p.key} emoji={p.emoji} />)}
 
-      {/* Emoji particles falling */}
-      {particles.map(p => (
-        <Particle key={p.key} emoji={p.emoji} index={p.key} total={particleCount} />
-      ))}
-
-      {/* Hero label */}
       <HeroLabel label={config.label} color={config.color} />
     </div>
   )

@@ -12,7 +12,7 @@ export default function AchievementNotification({ queue, onDismiss }) {
   }, [current, onDismiss])
 
   return (
-    <div className="fixed top-6 right-6 z-50 pointer-events-none">
+    <div className="fixed top-20 right-3 sm:top-6 sm:right-6 z-50 pointer-events-none">
       <AnimatePresence mode="wait">
         {current && (
           <motion.div
@@ -23,7 +23,7 @@ export default function AchievementNotification({ queue, onDismiss }) {
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             className="pointer-events-auto"
           >
-            <div className="glass rounded-2xl p-4 flex items-center gap-4 min-w-[320px] glow-gold border border-yellow-500/30">
+            <div className="glass rounded-2xl p-4 flex items-center gap-3 w-[min(320px,calc(100vw-1.5rem))] glow-gold border border-yellow-500/30">
               <div className="text-4xl no-select">{current.label.split(' ')[0]}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-semibold text-gold uppercase tracking-widest mb-0.5">Achievement Unlocked!</div>

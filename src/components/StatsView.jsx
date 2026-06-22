@@ -167,8 +167,8 @@ export default function StatsView({ entries }) {
             <div className="relative flex-shrink-0">
               <DonutChart data={stats.typeDonut} total={stats.total} />
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-xl font-black text-white">{stats.total}</div>
-                <div className="text-white/30 text-xs">total</div>
+                <div className="text-xl font-black text-white">{stats.watched}</div>
+                <div className="text-white/30 text-xs">watched</div>
               </div>
             </div>
             <div className="space-y-3 flex-1">

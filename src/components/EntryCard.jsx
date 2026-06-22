@@ -62,10 +62,17 @@ function PosterArea({ entry, posterUrl }) {
         />
       )}
 
-      {/* Watched checkmark (over everything) */}
-      {entry.watched && imgLoaded && (
-        <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
+      {/* Watched checkmark — always visible, not gated on imgLoaded */}
+      {entry.watched && (
+        <div className="absolute top-2 right-2 z-30 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
           <CheckCircle size={14} className="text-white" />
+        </div>
+      )}
+
+      {/* Coming soon ribbon */}
+      {entry.upcoming && !entry.watched && (
+        <div className="absolute bottom-0 left-0 right-0 z-30 bg-black/80 text-center py-0.5">
+          <span className="text-yellow-400 text-[8px] font-bold tracking-widest uppercase">Coming Soon</span>
         </div>
       )}
     </div>

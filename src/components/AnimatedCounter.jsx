@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
 export default function AnimatedCounter({ value, duration = 800, suffix = '' }) {
-  const [display, setDisplay] = useState(0)
+  const [display, setDisplay] = useState(value)
   const startRef = useRef(null)
-  const prevRef = useRef(0)
+  const prevRef  = useRef(value)
   const rafRef = useRef(null)
 
   useEffect(() => {

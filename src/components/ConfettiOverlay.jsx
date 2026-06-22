@@ -4,7 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
 export default function ConfettiOverlay({ show, onClose }) {
-  const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight })
+  const [dimensions, setDimensions] = useState(() => ({
+    width:  typeof window !== 'undefined' ? window.innerWidth  : 1200,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800,
+  }))
   const [run, setRun] = useState(false)
 
   useEffect(() => {
@@ -16,10 +19,11 @@ export default function ConfettiOverlay({ show, onClose }) {
   useEffect(() => {
     if (show) {
       setRun(true)
-      const t = setTimeout(() => setRun(false), 8000)
-      return () => clearTimeout(t)
+      const stopConfetti = setTimeout(() => setRun(false), 8000)
+      const autoClose    = setTimeout(onClose, 10000)
+      return () => { clearTimeout(stopConfetti); clearTimeout(autoClose) }
     }
-  }, [show])
+  }, [show, onClose])
 
   return (
     <AnimatePresence>

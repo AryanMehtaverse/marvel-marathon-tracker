@@ -5,7 +5,7 @@ import SearchAndFilters from './SearchAndFilters'
 import EntryCard from './EntryCard'
 import ProgressTracker from './ProgressTracker'
 
-const DEFAULT_FILTERS = { search: '', type: 'All', status: 'All', universe: 'All' }
+const DEFAULT_FILTERS = { search: '', type: 'All', status: 'All', universe: 'All', phase: 'All' }
 const SORT_OPTIONS = [
   { value: 'order',    label: 'Release Order' },
   { value: 'year',     label: 'Year' },
@@ -52,6 +52,7 @@ export default function EntriesView({ entries, onToggle, getPoster }) {
       if (search && !e.title.toLowerCase().includes(search)) return false
       if (filters.type !== 'All' && e.type !== filters.type) return false
       if (filters.universe !== 'All' && e.universe !== filters.universe) return false
+      if (filters.phase   !== 'All' && e.phase   !== filters.phase)   return false
       if (filters.status === 'Watched' && !e.watched) return false
       if (filters.status === 'Unwatched' && e.watched) return false
       return true

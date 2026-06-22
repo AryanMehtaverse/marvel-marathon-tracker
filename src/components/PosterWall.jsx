@@ -7,7 +7,7 @@ import GeneratedPoster from './GeneratedPoster'
 const UNIVERSE_COLORS = {
   MCU: '#E62429', 'Fox X-Men': '#F59E0B', 'Netflix Marvel': '#EC4899', 'Sony Spider-Man': '#3B82F6', 'Spider-Verse': '#A855F7',
 }
-const DEFAULT_FILTERS = { search: '', type: 'All', status: 'All', universe: 'All' }
+const DEFAULT_FILTERS = { search: '', type: 'All', status: 'All', universe: 'All', phase: 'All' }
 
 function PosterCard({ entry, onToggle, posterUrl, index }) {
   const [imgError,  setImgError]  = useState(false)
@@ -50,8 +50,20 @@ function PosterCard({ entry, onToggle, posterUrl, index }) {
           </>
         )}
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center gap-1.5 px-2 z-30">
+        {/* Watched indicator always visible */}
+        {entry.watched && (
+          <div className="absolute top-1 right-1 z-40 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow">
+            <CheckCircle size={11} className="text-white" />
+          </div>
+        )}
+
+        {/* Title always shown on mobile (sm and below), hover on desktop */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-4 pb-1 px-1 z-30 sm:hidden">
+          <span className="text-white text-[9px] font-semibold leading-tight line-clamp-2 block">{entry.title}</span>
+        </div>
+
+        {/* Hover overlay (desktop only) */}
+        <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center gap-1.5 px-2 z-30 hidden sm:flex">
           {entry.watched
             ? <CheckCircle size={20} className="text-primary drop-shadow-lg" />
             : <Circle size={20} className="text-white/80 drop-shadow-lg" />
@@ -75,6 +87,7 @@ export default function PosterWall({ entries, onToggle, getPoster }) {
     if (s && !e.title.toLowerCase().includes(s)) return false
     if (filters.type !== 'All' && e.type !== filters.type) return false
     if (filters.universe !== 'All' && e.universe !== filters.universe) return false
+    if (filters.phase   !== 'All' && e.phase   !== filters.phase)   return false
     if (filters.status === 'Watched' && !e.watched) return false
     if (filters.status === 'Unwatched' && e.watched) return false
     return true

@@ -5,6 +5,7 @@ import { useState } from 'react'
 const TYPES     = ['All', 'Movie', 'Series', 'Special']
 const STATUSES  = ['All', 'Watched', 'Unwatched']
 const UNIVERSES = ['All', 'MCU', 'Fox X-Men', 'Netflix Marvel', 'Sony Spider-Man', 'Spider-Verse']
+const PHASES    = ['All', 'Pre-MCU', 'Netflix', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4', 'Phase 5', 'Phase 6']
 
 function FilterPill({ label, active, onClick }) {
   return (
@@ -24,8 +25,8 @@ function FilterPill({ label, active, onClick }) {
 export default function SearchAndFilters({ filters, setFilters }) {
   const [showFilters, setShowFilters] = useState(false)
 
-  const update = (key, val) => setFilters(f => ({ ...f, [key]: val }))
-  const hasActive = filters.type !== 'All' || filters.status !== 'All' || filters.universe !== 'All'
+  const update    = (key, val) => setFilters(f => ({ ...f, [key]: val }))
+  const hasActive = filters.type !== 'All' || filters.status !== 'All' || filters.universe !== 'All' || (filters.phase && filters.phase !== 'All')
 
   return (
     <div className="space-y-3">
@@ -68,7 +69,7 @@ export default function SearchAndFilters({ filters, setFilters }) {
         transition={{ duration: 0.25, ease: 'easeInOut' }}
         className="overflow-hidden"
       >
-        <div className="bg-card border border-white/5 rounded-2xl p-4 space-y-3">
+        <div className="bg-card border border-white/5 rounded-2xl p-4 space-y-4">
           <div>
             <div className="text-white/30 text-xs font-semibold uppercase tracking-widest mb-2">Type</div>
             <div className="flex flex-wrap gap-2">
@@ -93,12 +94,20 @@ export default function SearchAndFilters({ filters, setFilters }) {
               ))}
             </div>
           </div>
+          <div>
+            <div className="text-white/30 text-xs font-semibold uppercase tracking-widest mb-2">Phase</div>
+            <div className="flex flex-wrap gap-2">
+              {PHASES.map(p => (
+                <FilterPill key={p} label={p} active={(filters.phase || 'All') === p} onClick={() => update('phase', p)} />
+              ))}
+            </div>
+          </div>
           {hasActive && (
             <button
-              onClick={() => setFilters(f => ({ ...f, type: 'All', status: 'All', universe: 'All' }))}
+              onClick={() => setFilters(f => ({ ...f, type: 'All', status: 'All', universe: 'All', phase: 'All' }))}
               className="text-xs text-primary hover:text-primary/70 font-medium"
             >
-              Clear filters
+              Clear all filters
             </button>
           )}
         </div>

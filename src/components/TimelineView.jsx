@@ -1,10 +1,13 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, CheckCircle, Circle, Film, Tv, Star } from 'lucide-react'
+import { ChevronDown, CheckCircle, Circle, Film, Tv, Star, Search, X } from 'lucide-react'
 
 const TYPE_ICONS = { Movie: Film, Series: Tv, Special: Star }
 const TYPE_COLORS = { Movie: '#60A5FA', Series: '#4ADE80', Special: '#C084FC' }
-const UNIVERSE_COLORS = { MCU: '#E62429', 'Fox X-Men': '#FCD34D', 'Netflix Marvel': '#FC6161' }
+const UNIVERSE_COLORS = {
+  MCU: '#E62429', 'Fox X-Men': '#FCD34D', 'Netflix Marvel': '#FC6161',
+  'Sony Spider-Man': '#60A5FA', 'Spider-Verse': '#C084FC',
+}
 
 function YearGroup({ year, entries, onToggle, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -69,8 +72,15 @@ function YearGroup({ year, entries, onToggle, defaultOpen }) {
                       <Icon size={16} style={{ color: typeColor }} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className={`font-semibold text-sm truncate ${entry.watched ? 'text-white' : 'text-white/70'}`}>
-                        {entry.title}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`font-semibold text-sm truncate ${entry.watched ? 'text-white' : 'text-white/70'}`}>
+                          {entry.title}
+                        </span>
+                        {entry.upcoming && (
+                          <span className="flex-shrink-0 text-[9px] font-bold bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded-full border border-yellow-500/30 tracking-wide">
+                            SOON
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs font-medium" style={{ color: univColor }}>{entry.universe}</span>
@@ -101,14 +111,21 @@ function YearGroup({ year, entries, onToggle, defaultOpen }) {
 }
 
 export default function TimelineView({ entries, onToggle }) {
+  const [search, setSearch] = useState('')
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return q ? entries.filter(e => e.title.toLowerCase().includes(q)) : entries
+  }, [entries, search])
+
   const byYear = useMemo(() => {
     const map = {}
-    entries.forEach(e => {
+    filtered.forEach(e => {
       if (!map[e.year]) map[e.year] = []
       map[e.year].push(e)
     })
     return Object.entries(map).sort(([a], [b]) => Number(a) - Number(b))
-  }, [entries])
+  }, [filtered])
 
   const currentYear = new Date().getFullYear()
 
@@ -118,16 +135,38 @@ export default function TimelineView({ entries, onToggle }) {
         <h2 className="text-white font-bold text-xl">Timeline</h2>
         <span className="text-white/30 text-sm">{byYear.length} years</span>
       </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Search timeline..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-full h-10 bg-card border border-white/10 rounded-xl pl-9 pr-9 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary/50 transition-colors"
+        />
+        {search && (
+          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60">
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
       <div className="space-y-3">
-        {byYear.map(([year, yEntries], i) => (
-          <YearGroup
-            key={year}
-            year={year}
-            entries={yEntries}
-            onToggle={onToggle}
-            defaultOpen={Number(year) >= currentYear - 1}
-          />
-        ))}
+        {byYear.length === 0 ? (
+          <div className="text-center py-16 text-white/30">No entries match your search</div>
+        ) : (
+          byYear.map(([year, yEntries]) => (
+            <YearGroup
+              key={year}
+              year={year}
+              entries={yEntries}
+              onToggle={onToggle}
+              defaultOpen={Number(year) >= currentYear - 1 || !!search}
+            />
+          ))
+        )}
       </div>
     </div>
   )

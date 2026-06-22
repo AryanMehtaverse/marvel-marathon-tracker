@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ENTRIES } from './data/entries'
 import { useLocalStorage } from './hooks/useLocalStorage'
@@ -54,7 +54,38 @@ export default function App() {
 
   const { getPoster, loading: posterLoading, progress } = useWikiPosters()
 
-  const entries = ENTRIES.map(e => ({ ...e, watched: watchedIds.includes(e.id) }))
+  const entries = useMemo(
+    () => ENTRIES.map(e => ({ ...e, watched: watchedIds.includes(e.id) })),
+    [watchedIds]
+  )
+
+  const handleExport = useCallback(() => {
+    const data = { watchedIds, unlockedAchievements, exportedAt: new Date().toISOString() }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `marvel-marathon-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [watchedIds, unlockedAchievements])
+
+  const handleImport = useCallback((e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result)
+        if (Array.isArray(data.watchedIds)) setWatchedIds(data.watchedIds)
+        if (Array.isArray(data.unlockedAchievements)) setUnlockedAchievements(data.unlockedAchievements)
+      } catch {
+        alert('Invalid backup file.')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }, [setWatchedIds, setUnlockedAchievements])
 
   const handleToggle = useCallback((id) => {
     setWatchedIds(prev => {
@@ -95,7 +126,7 @@ export default function App() {
       <PosterLoadingBar loading={posterLoading} progress={progress} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {activeTab === 'dashboard'    && <Dashboard entries={entries} unlockedAchievements={unlockedAchievements} />}
+        {activeTab === 'dashboard'    && <Dashboard entries={entries} unlockedAchievements={unlockedAchievements} onExport={handleExport} onImport={handleImport} />}
         {activeTab === 'entries'      && <EntriesView entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'timeline'     && <TimelineView entries={entries} onToggle={handleToggle} />}
         {activeTab === 'posterwall'   && <PosterWall entries={entries} onToggle={handleToggle} getPoster={getPoster} />}

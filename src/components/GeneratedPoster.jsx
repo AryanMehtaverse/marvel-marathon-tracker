@@ -144,16 +144,27 @@ export default function GeneratedPoster({ entry, watched, className = '' }) {
           {universe === 'MCU' ? 'M' : universe === 'Fox X-Men' ? 'X' : universe === 'Sony Spider-Man' ? 'S' : universe === 'Spider-Verse' ? '∞' : 'N'}
         </text>
 
-        {/* MARVEL badge at top */}
-        <rect x="8" y="10" width="48" height="16" rx="2" fill="#E62429" />
-        <text
-          x="32" y="22"
-          textAnchor="middle" dominantBaseline="middle"
-          fontFamily="Arial Black, Impact, sans-serif"
-          fontSize="9" fontWeight="900" fill="white" letterSpacing="0.5"
-        >
-          MARVEL
-        </text>
+        {/* Studio badge — correct per universe */}
+        {(() => {
+          const studioColor = universe === 'Fox X-Men' ? '#1A1A2E'
+            : universe === 'Sony Spider-Man' ? '#003087'
+            : universe === 'Spider-Verse'    ? '#4C1D95'
+            : '#E62429'
+          const studioLabel = universe === 'Fox X-Men' ? '20TH CENTURY'
+            : universe === 'Sony Spider-Man' ? 'SONY PICTURES'
+            : universe === 'Spider-Verse'    ? 'SONY ANIMATION'
+            : 'MARVEL STUDIOS'
+          return (
+            <>
+              <rect x="6" y="10" width="58" height="15" rx="2" fill={studioColor} />
+              <text x="35" y="20" textAnchor="middle" dominantBaseline="middle"
+                fontFamily="Arial Black, Impact, sans-serif"
+                fontSize="6.5" fontWeight="900" fill="white" letterSpacing="0.2">
+                {studioLabel}
+              </text>
+            </>
+          )
+        })()}
 
         {/* Phase pill */}
         <rect
