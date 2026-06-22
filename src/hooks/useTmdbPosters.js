@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 
-const CACHE_KEY = 'marvel-tmdb-posters-v1'
+const CACHE_KEY = 'marvel-tmdb-posters-v3'
 const TTL_MS    = 30 * 24 * 60 * 60 * 1000 // 30 days
 const IMG_BASE  = 'https://image.tmdb.org/t/p/w500'
 const TOKEN     = import.meta.env.VITE_TMDB_TOKEN
