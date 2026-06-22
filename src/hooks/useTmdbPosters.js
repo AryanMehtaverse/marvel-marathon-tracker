@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useLocalStorage } from './useLocalStorage'
 
-const CACHE_KEY = 'marvel-tmdb-posters-v3'
+const CACHE_KEY = 'marvel-tmdb-posters-v4'
 const TTL_MS    = 30 * 24 * 60 * 60 * 1000 // 30 days
 const IMG_BASE  = 'https://image.tmdb.org/t/p/w500'
 const TOKEN     = import.meta.env.VITE_TMDB_TOKEN
@@ -21,7 +21,7 @@ const TMDB_MAP = [
   { id: 22, tmdb: 293660, type: 'movie' }, // Deadpool
   { id: 38, tmdb: 383498, type: 'movie' }, // Deadpool 2
   { id: 45, tmdb: 320288, type: 'movie' }, // Dark Phoenix
-  { id: 28, tmdb: 263952, type: 'movie' }, // Logan
+  { id: 28, tmdb: 329865, type: 'movie' }, // Logan
   { id: 48, tmdb: 430055, type: 'movie' }, // New Mutants
 
   // ── Sony Spider-Man (Tobey) ────────────────────────────────────────────────
@@ -52,7 +52,7 @@ const TMDB_MAP = [
   { id: 15, tmdb: 100402, type: 'movie' }, // Winter Soldier
   { id: 17, tmdb: 118340, type: 'movie' }, // Guardians of the Galaxy
   { id: 19, tmdb: 99861,  type: 'movie' }, // Age of Ultron
-  { id: 20, tmdb: 140607, type: 'movie' }, // Ant-Man (note: 102899 is correct)
+  { id: 20, tmdb: 102899, type: 'movie' }, // Ant-Man
 
   // ── MCU Phase 3 ────────────────────────────────────────────────────────────
   { id: 24, tmdb: 271110, type: 'movie' }, // Civil War
@@ -116,8 +116,8 @@ const TMDB_MAP = [
   { id: 76, tmdb: 822119, type: 'movie' }, // Captain America: Brave New World
   { id: 77, tmdb: 209867, type: 'tv'    }, // Daredevil: Born Again
   { id: 78, tmdb: 986056, type: 'movie' }, // Thunderbolts*
-  { id: 79, tmdb: 140607, type: 'tv'    }, // Ironheart
-  { id: 80, tmdb: 617127, type: 'movie' }, // Fantastic Four: First Steps
+  { id: 79, tmdb: 228164, type: 'tv'    }, // Ironheart
+  { id: 80, tmdb: 906126, type: 'movie' }, // Fantastic Four: First Steps
 
   // ── MCU Phase 6 ────────────────────────────────────────────────────────────
   { id: 81, tmdb: 209867, type: 'tv'    }, // Daredevil: Born Again S2
