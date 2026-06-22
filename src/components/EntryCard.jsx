@@ -12,7 +12,8 @@ const UNIVERSE_COLORS = {
   MCU:               { bg: 'rgba(230,36,41,0.15)',  text: '#F87171', border: 'rgba(230,36,41,0.3)'  },
   'Fox X-Men':       { bg: 'rgba(245,158,11,0.15)', text: '#FCD34D', border: 'rgba(245,158,11,0.3)' },
   'Netflix Marvel':  { bg: 'rgba(239,68,68,0.15)',  text: '#FC6161', border: 'rgba(239,68,68,0.3)'  },
-  'Sony Spider-Man': { bg: 'rgba(59,130,246,0.15)', text: '#93C5FD', border: 'rgba(59,130,246,0.3)' },
+  'Sony Spider-Man': { bg: 'rgba(59,130,246,0.15)',  text: '#93C5FD', border: 'rgba(59,130,246,0.3)'  },
+  'Spider-Verse':    { bg: 'rgba(168,85,247,0.15)',  text: '#E879F9', border: 'rgba(168,85,247,0.3)'  },
 }
 const PHASE_COLORS = {
   'Pre-MCU': '#6B7280', 'Phase 1': '#3B82F6', 'Phase 2': '#8B5CF6',

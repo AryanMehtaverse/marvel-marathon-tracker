@@ -21,6 +21,11 @@ const UNIVERSE_GRADIENTS = {
     ['#000a14', '#001020', '#1e3a8a'],
     ['#050010', '#0a0030', '#3730a3'],
   ],
+  'Spider-Verse': [
+    ['#0a0014', '#1a0030', '#7C3AED'],
+    ['#050020', '#120040', '#6D28D9'],
+    ['#0a0010', '#200030', '#A855F7'],
+  ],
 }
 
 const PHASE_ACCENT = {
@@ -136,7 +141,7 @@ export default function GeneratedPoster({ entry, watched, className = '' }) {
           fill={accent}
           fillOpacity="0.05"
         >
-          {universe === 'MCU' ? 'M' : universe === 'Fox X-Men' ? 'X' : universe === 'Sony Spider-Man' ? 'S' : 'N'}
+          {universe === 'MCU' ? 'M' : universe === 'Fox X-Men' ? 'X' : universe === 'Sony Spider-Man' ? 'S' : universe === 'Spider-Verse' ? '∞' : 'N'}
         </text>
 
         {/* MARVEL badge at top */}
