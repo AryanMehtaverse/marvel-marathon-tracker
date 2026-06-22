@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Film, Clock, Grid3X3, Trophy, BarChart3, Layers } from 'lucide-react'
+import { LayoutDashboard, Film, Clock, Grid3X3, Trophy, BarChart3, Layers, HelpCircle } from 'lucide-react'
 import MarvelLogo from './MarvelLogo'
 
 const TABS = [
@@ -10,6 +10,7 @@ const TABS = [
   { id: 'posterwall',   label: 'Poster Wall',  icon: Grid3X3 },
   { id: 'stats',        label: 'Stats',        icon: BarChart3 },
   { id: 'achievements', label: 'Achievements', icon: Trophy },
+  { id: 'watchguide',   label: 'Watch Guide',   icon: HelpCircle },
 ]
 
 export default function Navbar({ activeTab, setActiveTab }) {

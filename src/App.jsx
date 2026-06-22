@@ -15,6 +15,7 @@ import AchievementNotification from './components/AchievementNotification'
 import ConfettiOverlay from './components/ConfettiOverlay'
 import HeroEffect, { getHeroEffect } from './components/HeroEffect'
 import CollectionsView from './components/CollectionsView'
+import WatchGuide from './components/WatchGuide'
 
 function PosterLoadingBar({ loading, progress }) {
   if (!loading) return null
@@ -134,6 +135,7 @@ export default function App() {
         {activeTab === 'posterwall'   && <PosterWall entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'stats'        && <StatsView entries={entries} />}
         {activeTab === 'achievements' && <Achievements entries={entries} unlockedAchievements={unlockedAchievements} />}
+        {activeTab === 'watchguide'   && <WatchGuide entries={entries} onToggle={handleToggle} />}
       </main>
 
       <AchievementNotification queue={notifQueue} onDismiss={dismissNotif} />
