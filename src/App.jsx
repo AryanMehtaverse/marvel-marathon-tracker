@@ -14,6 +14,7 @@ import Achievements from './components/Achievements'
 import AchievementNotification from './components/AchievementNotification'
 import ConfettiOverlay from './components/ConfettiOverlay'
 import HeroEffect, { getHeroEffect } from './components/HeroEffect'
+import CollectionsView from './components/CollectionsView'
 
 function PosterLoadingBar({ loading, progress }) {
   if (!loading) return null
@@ -127,6 +128,7 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {activeTab === 'dashboard'    && <Dashboard entries={entries} unlockedAchievements={unlockedAchievements} onExport={handleExport} onImport={handleImport} />}
+        {activeTab === 'collections'  && <CollectionsView entries={entries} onToggle={handleToggle} />}
         {activeTab === 'entries'      && <EntriesView entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'timeline'     && <TimelineView entries={entries} onToggle={handleToggle} />}
         {activeTab === 'posterwall'   && <PosterWall entries={entries} onToggle={handleToggle} getPoster={getPoster} />}

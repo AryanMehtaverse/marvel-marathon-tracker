@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Film, Clock, Grid3X3, Trophy, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, Film, Clock, Grid3X3, Trophy, BarChart3, Layers } from 'lucide-react'
 import MarvelLogo from './MarvelLogo'
 
 const TABS = [
   { id: 'dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
+  { id: 'collections',  label: 'Collections',  icon: Layers },
   { id: 'entries',      label: 'Entries',      icon: Film },
   { id: 'timeline',     label: 'Timeline',     icon: Clock },
   { id: 'posterwall',   label: 'Poster Wall',  icon: Grid3X3 },
