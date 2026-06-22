@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ENTRIES } from './data/entries'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useAchievements } from './hooks/useAchievements'
-import { useWikiPosters } from './hooks/useWikiPosters'
+import { useTmdbPosters } from './hooks/useTmdbPosters'
 import Navbar from './components/Navbar'
 import Dashboard from './components/Dashboard'
 import EntriesView from './components/EntriesView'
@@ -54,7 +54,7 @@ export default function App() {
   const [heroEffect, setHeroEffect]                     = useState(null)   // { type: string }
   const brandNewDayShown                                = useRef(false)
 
-  const { getPoster, loading: posterLoading, progress } = useWikiPosters()
+  const { getPoster, loading: posterLoading, progress } = useTmdbPosters()
 
   const entries = useMemo(
     () => ENTRIES.map(e => ({ ...e, watched: watchedIds.includes(e.id) })),
