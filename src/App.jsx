@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ENTRIES } from './data/entries'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useAchievements } from './hooks/useAchievements'
-import { useTMDB } from './hooks/useTMDB'
+import { useWikiPosters } from './hooks/useWikiPosters'
 import Navbar from './components/Navbar'
 import Dashboard from './components/Dashboard'
 import EntriesView from './components/EntriesView'
@@ -12,16 +13,44 @@ import StatsView from './components/StatsView'
 import Achievements from './components/Achievements'
 import AchievementNotification from './components/AchievementNotification'
 import ConfettiOverlay from './components/ConfettiOverlay'
-import TMDBSetupBanner from './components/TMDBSetupBanner'
+
+function PosterLoadingBar({ loading, progress }) {
+  if (!loading) return null
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+        className="fixed top-16 left-0 right-0 z-50 pointer-events-none"
+      >
+        <div className="h-0.5 bg-white/5 w-full">
+          <motion.div
+            className="h-full bg-primary"
+            initial={{ width: '0%' }}
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: 'easeOut' }}
+          />
+        </div>
+        <div className="flex justify-center mt-1">
+          <span className="text-xs text-white/30 bg-bg px-2 py-0.5 rounded-full">
+            Loading posters… {progress}%
+          </span>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
 
 export default function App() {
-  const [watchedIds, setWatchedIds]               = useLocalStorage('marvel-watched', [])
+  const [watchedIds, setWatchedIds]                     = useLocalStorage('marvel-watched', [])
   const [unlockedAchievements, setUnlockedAchievements] = useLocalStorage('marvel-achievements', [])
-  const [activeTab, setActiveTab]                 = useState('dashboard')
-  const [notifQueue, setNotifQueue]               = useState([])
-  const [showConfetti, setShowConfetti]           = useState(false)
-  const brandNewDayShown                          = useRef(false)
-  const { getPoster, loading: posterLoading, hasKey } = useTMDB()
+  const [activeTab, setActiveTab]                       = useState('dashboard')
+  const [notifQueue, setNotifQueue]                     = useState([])
+  const [showConfetti, setShowConfetti]                 = useState(false)
+  const brandNewDayShown                                = useRef(false)
+
+  const { getPoster, loading: posterLoading, progress } = useWikiPosters()
 
   const entries = ENTRIES.map(e => ({ ...e, watched: watchedIds.includes(e.id) }))
 
@@ -53,10 +82,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-bg">
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <PosterLoadingBar loading={posterLoading} progress={progress} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <TMDBSetupBanner hasKey={hasKey} loading={posterLoading} />
-
         {activeTab === 'dashboard'    && <Dashboard entries={entries} unlockedAchievements={unlockedAchievements} />}
         {activeTab === 'entries'      && <EntriesView entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'timeline'     && <TimelineView entries={entries} onToggle={handleToggle} />}
