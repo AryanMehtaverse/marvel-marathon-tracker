@@ -4,6 +4,9 @@ import { CheckCircle, Circle } from 'lucide-react'
 import SearchAndFilters from './SearchAndFilters'
 import GeneratedPoster from './GeneratedPoster'
 
+const UNIVERSE_COLORS = {
+  MCU: '#E62429', 'Fox X-Men': '#F59E0B', 'Netflix Marvel': '#EC4899', 'Sony Spider-Man': '#3B82F6',
+}
 const DEFAULT_FILTERS = { search: '', type: 'All', status: 'All', universe: 'All' }
 
 function PosterCard({ entry, onToggle, posterUrl, index }) {

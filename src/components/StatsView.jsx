@@ -4,7 +4,7 @@ import { Clock, Film, Tv, Star, TrendingUp } from 'lucide-react'
 import AnimatedCounter from './AnimatedCounter'
 
 const UNIVERSE_COLORS = {
-  MCU: '#E62429', 'Fox X-Men': '#F59E0B', 'Netflix Marvel': '#EC4899',
+  MCU: '#E62429', 'Fox X-Men': '#F59E0B', 'Netflix Marvel': '#EC4899', 'Sony Spider-Man': '#3B82F6',
 }
 const PHASE_COLORS = {
   'Pre-MCU': '#6B7280', 'Phase 1': '#3B82F6', 'Phase 2': '#8B5CF6',

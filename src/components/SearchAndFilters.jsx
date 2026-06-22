@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 const TYPES     = ['All', 'Movie', 'Series', 'Special']
 const STATUSES  = ['All', 'Watched', 'Unwatched']
-const UNIVERSES = ['All', 'MCU', 'Fox X-Men', 'Netflix Marvel']
+const UNIVERSES = ['All', 'MCU', 'Fox X-Men', 'Netflix Marvel', 'Sony Spider-Man']
 
 function FilterPill({ label, active, onClick }) {
   return (
