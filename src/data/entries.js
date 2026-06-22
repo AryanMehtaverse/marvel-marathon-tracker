@@ -101,14 +101,129 @@ export const MILESTONES = [
   { id: 'brand-new-day','title': 'Spider-Man: Brand New Day',entryId: 83, icon: '🌅', color: '#FFD700' },
 ]
 
+const has  = (ids, e)  => ids.every(id => e.find(x => x.id === id)?.watched)
+const hasU = (u,   e)  => e.filter(x => x.universe === u).every(x => x.watched)
+const hasP = (ps,  e)  => e.filter(x => ps.includes(x.phase)).every(x => x.watched)
+
 export const ACHIEVEMENTS_DEF = [
-  { id: 'first',       label: '🏆 First Entry Watched',        description: 'Watch your first entry',           check: (w)       => w >= 1 },
-  { id: 'quarter',     label: '🏆 25% Complete',               description: 'Watch 25% of all entries',         check: (w, t)    => w / t >= 0.25 },
-  { id: 'half',        label: '🏆 50% Complete',               description: 'Watch half of all entries',        check: (w, t)    => w / t >= 0.5 },
-  { id: 'three-q',     label: '🏆 75% Complete',               description: 'Watch 75% of all entries',         check: (w, t)    => w / t >= 0.75 },
-  { id: 'infinity',    label: '🏆 Infinity Saga Complete',     description: 'Watch all Phase 1–3 MCU entries',  check: (w, t, e) => e.filter(x => ['Phase 1','Phase 2','Phase 3'].includes(x.phase)).every(x => x.watched) },
-  { id: 'xmen',        label: '🏆 X-Men Completionist',        description: 'Watch all Fox X-Men entries',      check: (w, t, e) => e.filter(x => x.universe === 'Fox X-Men').every(x => x.watched) },
-  { id: 'defenders',   label: "🏆 Defender Of Hell's Kitchen", description: 'Watch all Netflix Marvel entries',  check: (w, t, e) => e.filter(x => x.universe === 'Netflix Marvel').every(x => x.watched) },
-  { id: 'spiderverse', label: '🏆 Spider-Verse Explorer',      description: 'Watch all Spider-Man entries',     check: (w, t, e) => e.filter(x => x.title.toLowerCase().includes('spider')).every(x => x.watched) },
-  { id: 'brandnewday', label: '🏆 Brand New Day Ready',        description: 'Watch Spider-Man: Brand New Day',  check: (w, t, e) => e.find(x => x.id === 83)?.watched },
+  {
+    id: 'excelsior',
+    label: '🎯 Excelsior!',
+    description: 'Watch your very first entry — True Believer status achieved.',
+    check: (w) => w >= 1,
+  },
+  {
+    id: 'iron-man-trilogy',
+    label: '🔴 I Am Iron Man',
+    description: 'Complete the entire Iron Man trilogy.',
+    check: (w, t, e) => has([4, 7, 12], e),
+  },
+  {
+    id: 'son-of-odin',
+    label: '⚡ Son of Odin',
+    description: 'Watch all four Thor films.',
+    check: (w, t, e) => has([8, 14, 33, 61], e),
+  },
+  {
+    id: 'star-spangled',
+    label: '🛡️ Star-Spangled Man',
+    description: 'Watch every Captain America film.',
+    check: (w, t, e) => has([10, 15, 24, 76], e),
+  },
+  {
+    id: 'we-are-groot',
+    label: '🌿 We Are Groot',
+    description: 'Complete the full Guardians of the Galaxy trilogy.',
+    check: (w, t, e) => has([17, 30, 68], e),
+  },
+  {
+    id: 'avengers-assemble',
+    label: '⚔️ Avengers Assemble!',
+    description: 'Watch all four Avengers films.',
+    check: (w, t, e) => has([11, 19, 37, 44], e),
+  },
+  {
+    id: 'the-snap',
+    label: '💎 Thanos Demands Silence',
+    description: 'Watch Avengers: Infinity War.',
+    check: (w, t, e) => e.find(x => x.id === 37)?.watched,
+  },
+  {
+    id: 'i-love-you-3000',
+    label: '❤️ I Love You 3000',
+    description: 'Watch Avengers: Endgame.',
+    check: (w, t, e) => e.find(x => x.id === 44)?.watched,
+  },
+  {
+    id: 'infinity-saga',
+    label: '🌀 The Infinity Saga',
+    description: 'Complete every MCU Phase 1, 2 and 3 entry.',
+    check: (w, t, e) => hasP(['Phase 1','Phase 2','Phase 3'], e),
+  },
+  {
+    id: 'multiverse-saga',
+    label: '🌌 Enter the Multiverse',
+    description: 'Complete every MCU Phase 4, 5 and 6 entry.',
+    check: (w, t, e) => hasP(['Phase 4','Phase 5','Phase 6'], e),
+  },
+  {
+    id: 'friendly-neighbourhood',
+    label: '🕷️ Friendly Neighbourhood',
+    description: 'Watch all live-action Spider-Man films (Tobey, Andrew & Tom).',
+    check: (w, t, e) => has([85, 86, 87, 88, 89, 31, 47, 57, 83], e),
+  },
+  {
+    id: 'miles-to-go',
+    label: '∞ Miles to Go',
+    description: 'Watch the complete Spider-Verse animated trilogy.',
+    check: (w, t, e) => has([90, 91, 92], e),
+  },
+  {
+    id: 'maximum-effort',
+    label: '😈 Maximum Effort',
+    description: 'Watch all three Deadpool films.',
+    check: (w, t, e) => has([22, 38, 73], e),
+  },
+  {
+    id: 'best-there-is',
+    label: '🐺 The Best There Is',
+    description: 'Watch all three Wolverine solo films.',
+    check: (w, t, e) => has([6, 13, 28], e),
+  },
+  {
+    id: 'mutant-proud',
+    label: '⚔️ Mutant and Proud',
+    description: 'Watch every Fox X-Men film.',
+    check: (w, t, e) => hasU('Fox X-Men', e),
+  },
+  {
+    id: 'hell-kitchen',
+    label: '😈 Devil of Hell\'s Kitchen',
+    description: 'Watch every Daredevil season.',
+    check: (w, t, e) => has([18, 23, 42, 77, 81], e),
+  },
+  {
+    id: 'defenders-united',
+    label: '🗽 The Defenders United',
+    description: 'Watch all Netflix Marvel shows.',
+    check: (w, t, e) => hasU('Netflix Marvel', e),
+  },
+  {
+    id: 'wakanda-forever',
+    label: '🌍 Wakanda Forever',
+    description: 'Watch both Black Panther films.',
+    check: (w, t, e) => has([35, 65], e),
+  },
+  {
+    id: 'what-if',
+    label: '🎭 What If...?',
+    description: 'Watch every season of What If...?',
+    check: (w, t, e) => e.filter(x => x.title.includes('What If')).every(x => x.watched),
+  },
+  {
+    id: 'brand-new-day',
+    label: '🌅 Brand New Day',
+    description: 'Watch Spider-Man: Brand New Day — the journey is complete.',
+    check: (w, t, e) => e.find(x => x.id === 83)?.watched,
+  },
 ]
