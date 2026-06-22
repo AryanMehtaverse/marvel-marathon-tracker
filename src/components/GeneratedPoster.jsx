@@ -1,88 +1,53 @@
-// Generates a unique, beautiful SVG poster for each entry — no external API needed.
-
-const UNIVERSE_GRADIENTS = {
-  MCU: [
-    ['#1a0000', '#3d0000', '#E62429'],
-    ['#0a0010', '#1a0030', '#E62429'],
-    ['#000a1a', '#001a3d', '#c41e21'],
-    ['#0d0000', '#2a0a0a', '#B11313'],
-  ],
-  'Fox X-Men': [
-    ['#0a0800', '#1a1400', '#F59E0B'],
-    ['#100500', '#221000', '#D97706'],
-    ['#080a00', '#121800', '#EAB308'],
-  ],
-  'Netflix Marvel': [
-    ['#1a0000', '#2a0000', '#E50914'],
-    ['#0d0000', '#200000', '#DC2626'],
-  ],
-  'Sony Spider-Man': [
-    ['#00060a', '#001833', '#1d4ed8'],
-    ['#000a14', '#001020', '#1e3a8a'],
-    ['#050010', '#0a0030', '#3730a3'],
-  ],
-  'Spider-Verse': [
-    ['#0a0014', '#1a0030', '#7C3AED'],
-    ['#050020', '#120040', '#6D28D9'],
-    ['#0a0010', '#200030', '#A855F7'],
-  ],
+const UNIVERSE_PALETTES = {
+  MCU:              { bg1: '#0d0005', bg2: '#1a000a', bg3: '#2d0010', accent: '#E62429', letter: 'M' },
+  'Fox X-Men':      { bg1: '#080600', bg2: '#141000', bg3: '#201800', accent: '#F59E0B', letter: 'X' },
+  'Netflix Marvel': { bg1: '#0d0000', bg2: '#1a0000', bg3: '#250000', accent: '#E50914', letter: 'N' },
+  'Sony Spider-Man':{ bg1: '#00060f', bg2: '#000e1f', bg3: '#001530', accent: '#3B82F6', letter: 'S' },
+  'Spider-Verse':   { bg1: '#070010', bg2: '#0f0020', bg3: '#180035', accent: '#A855F7', letter: '∞' },
 }
 
-const PHASE_ACCENT = {
+const PHASE_COLORS = {
   'Pre-MCU': '#F59E0B', 'Phase 1': '#3B82F6', 'Phase 2': '#8B5CF6',
-  'Phase 3': '#E62429',  'Phase 4': '#10B981', 'Phase 5': '#F59E0B',
-  'Phase 6': '#FFD700',  'Netflix': '#E50914',
+  'Phase 3': '#E62429', 'Phase 4': '#10B981', 'Phase 5': '#F59E0B',
+  'Phase 6': '#FFD700', 'Netflix': '#E50914',
 }
 
-// deterministic "random" seeded by title string
 function seeded(str, offset = 0) {
   let h = offset
   for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0
-  return ((h >>> 0) / 0xFFFFFFFF)
-}
-
-function hashIndex(str, len, offset = 0) {
-  return Math.floor(seeded(str, offset) * len)
+  return (h >>> 0) / 0xFFFFFFFF
 }
 
 function wrapText(text, maxChars) {
   const words = text.split(' ')
   const lines = []
-  let current = ''
-  for (const word of words) {
-    if ((current + ' ' + word).trim().length <= maxChars) {
-      current = (current + ' ' + word).trim()
-    } else {
-      if (current) lines.push(current)
-      current = word
-    }
+  let cur = ''
+  for (const w of words) {
+    if ((cur + ' ' + w).trim().length <= maxChars) { cur = (cur + ' ' + w).trim() }
+    else { if (cur) lines.push(cur); cur = w }
   }
-  if (current) lines.push(current)
-  return lines.slice(0, 3) // max 3 lines
+  if (cur) lines.push(cur)
+  return lines.slice(0, 3)
 }
 
 export default function GeneratedPoster({ entry, watched, className = '' }) {
-  const { title, year, universe, phase, type } = entry
+  const { title, year, universe, phase, type, id } = entry
+  const pal    = UNIVERSE_PALETTES[universe] || UNIVERSE_PALETTES.MCU
+  const accent = pal.accent
+  const phaseC = PHASE_COLORS[phase] || accent
 
-  const gradients  = UNIVERSE_GRADIENTS[universe] || UNIVERSE_GRADIENTS.MCU
-  const gradIdx    = hashIndex(title, gradients.length)
-  const [c1, c2, c3] = gradients[gradIdx]
-  const accent     = PHASE_ACCENT[phase] || '#E62429'
+  const s1 = seeded(title, 1), s2 = seeded(title, 2)
+  const s3 = seeded(title, 3), s4 = seeded(title, 4)
 
-  // Geometric pattern seed values
-  const s1 = seeded(title, 1)
-  const s2 = seeded(title, 2)
-  const s3 = seeded(title, 3)
-  const s4 = seeded(title, 4)
-  const s5 = seeded(title, 5)
+  const lines    = wrapText(title, 13)
+  const fontSize = lines.length === 1 ? 17 : lines.length === 2 ? 14 : 12
+  const lineH    = fontSize * 1.35
+  // title block sits in lower-center of poster
+  const textY    = 148 - (lines.length * lineH) / 2
 
-  const lines      = wrapText(title, 14)
-  const fontSize   = lines.length === 1 ? 18 : lines.length === 2 ? 16 : 14
-  const lineH      = fontSize * 1.3
-  const textY      = 130 - (lines.length * lineH) / 2
-
-  const gradId = `g-${entry.id}`
-  const clipId = `c-${entry.id}`
+  const gId  = `gp-${id}`
+  const g2Id = `gp2-${id}`
+  const cId  = `cp-${id}`
 
   return (
     <svg
@@ -92,100 +57,72 @@ export default function GeneratedPoster({ entry, watched, className = '' }) {
       style={{ display: 'block', width: '100%', height: '100%' }}
     >
       <defs>
-        <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor={c1} />
-          <stop offset="50%"  stopColor={c2} />
-          <stop offset="100%" stopColor={c3} stopOpacity="0.4" />
+        <linearGradient id={gId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stopColor={pal.bg1} />
+          <stop offset="55%"  stopColor={pal.bg2} />
+          <stop offset="100%" stopColor={pal.bg3} />
         </linearGradient>
-        <clipPath id={clipId}>
-          <rect width="160" height="240" rx="0" />
+        {/* Vignette — darkens edges so title pops */}
+        <radialGradient id={g2Id} cx="50%" cy="50%" r="70%">
+          <stop offset="0%"   stopColor="transparent" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.55)" />
+        </radialGradient>
+        <clipPath id={cId}>
+          <rect width="160" height="240" />
         </clipPath>
       </defs>
 
-      <g clipPath={`url(#${clipId})`}>
-        {/* Base gradient */}
-        <rect width="160" height="240" fill={`url(#${gradId})`} />
+      <g clipPath={`url(#${cId})`}>
+        {/* Base */}
+        <rect width="160" height="240" fill={`url(#${gId})`} />
 
-        {/* Geometric background elements */}
-        <circle
-          cx={20 + s1 * 120} cy={20 + s2 * 80}
-          r={40 + s3 * 60}
-          fill={accent} fillOpacity="0.06"
+        {/* Soft radial glow — unique per entry */}
+        <ellipse
+          cx={30 + s1 * 100} cy={30 + s2 * 80}
+          rx={55 + s3 * 45} ry={45 + s4 * 35}
+          fill={accent} fillOpacity="0.09"
         />
-        <circle
-          cx={s4 * 160} cy={160 + s5 * 80}
-          r={50 + s1 * 50}
-          fill={accent} fillOpacity="0.05"
+        <ellipse
+          cx={160 - s2 * 100} cy={160 + s1 * 60}
+          rx={50 + s4 * 40} ry={40 + s3 * 30}
+          fill={phaseC} fillOpacity="0.06"
         />
 
-        {/* Diagonal lines pattern */}
-        {[0,1,2,3,4,5,6].map(i => (
+        {/* Subtle diagonal stripe */}
+        {[0,1,2,3,4,5].map(i => (
           <line
             key={i}
-            x1={-20 + i * 35 + s2 * 20} y1="0"
-            x2={-60 + i * 35 + s2 * 20} y2="240"
-            stroke={accent} strokeOpacity="0.04" strokeWidth="18"
+            x1={-30 + i * 40 + s1 * 15} y1="0"
+            x2={-70 + i * 40 + s1 * 15} y2="240"
+            stroke={accent} strokeOpacity="0.03" strokeWidth="22"
           />
         ))}
 
-        {/* Top accent bar */}
-        <rect x="0" y="0" width="160" height="3" fill={accent} fillOpacity="0.8" />
+        {/* Vignette */}
+        <rect width="160" height="240" fill={`url(#${g2Id})`} />
 
-        {/* Universe monogram - large faint letter */}
+        {/* Big faint monogram */}
         <text
-          x="80" y="100"
+          x="80" y="95"
           textAnchor="middle" dominantBaseline="middle"
           fontFamily="Arial Black, Impact, sans-serif"
-          fontSize="110"
-          fontWeight="900"
-          fill={accent}
-          fillOpacity="0.05"
+          fontSize="120" fontWeight="900"
+          fill={accent} fillOpacity="0.055"
         >
-          {universe === 'MCU' ? 'M' : universe === 'Fox X-Men' ? 'X' : universe === 'Sony Spider-Man' ? 'S' : universe === 'Spider-Verse' ? '∞' : 'N'}
+          {pal.letter}
         </text>
 
-        {/* Studio badge — correct per universe */}
-        {(() => {
-          const studioColor = universe === 'Fox X-Men' ? '#1A1A2E'
-            : universe === 'Sony Spider-Man' ? '#003087'
-            : universe === 'Spider-Verse'    ? '#4C1D95'
-            : '#E62429'
-          const studioLabel = universe === 'Fox X-Men' ? '20TH CENTURY'
-            : universe === 'Sony Spider-Man' ? 'SONY PICTURES'
-            : universe === 'Spider-Verse'    ? 'SONY ANIMATION'
-            : 'MARVEL STUDIOS'
-          return (
-            <>
-              <rect x="6" y="10" width="58" height="15" rx="2" fill={studioColor} />
-              <text x="35" y="20" textAnchor="middle" dominantBaseline="middle"
-                fontFamily="Arial Black, Impact, sans-serif"
-                fontSize="6.5" fontWeight="900" fill="white" letterSpacing="0.2">
-                {studioLabel}
-              </text>
-            </>
-          )
-        })()}
+        {/* Thin accent top bar */}
+        <rect x="0" y="0" width="160" height="2.5" fill={accent} fillOpacity="0.9" />
 
-        {/* Phase pill */}
+        {/* ── Title block (no clashing badges) ── */}
+        {/* Semi-transparent scrim behind title */}
         <rect
-          x="160" y="10" width={phase.length * 6 + 10} height="15"
-          rx="7"
-          fill={accent} fillOpacity="0.9"
-          transform={`translate(-${phase.length * 6 + 18}, 0)`}
+          x="0" y={textY - 10}
+          width="160" height={lines.length * lineH + 22}
+          fill="rgba(0,0,0,0.38)"
         />
-        <text
-          x={152} y={20}
-          textAnchor="end" dominantBaseline="middle"
-          fontFamily="Arial, sans-serif"
-          fontSize="7" fontWeight="700" fill="white" fillOpacity="0.95"
-        >
-          {phase}
-        </text>
 
-        {/* Center glow */}
-        <ellipse cx="80" cy="130" rx="55" ry="40" fill={accent} fillOpacity="0.07" />
-
-        {/* Title text */}
         {lines.map((line, i) => (
           <text
             key={i}
@@ -197,35 +134,35 @@ export default function GeneratedPoster({ entry, watched, className = '' }) {
             fontSize={fontSize}
             fontWeight="900"
             fill="white"
-            fillOpacity={watched ? 1 : 0.9}
-            style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.8))' }}
+            fillOpacity={watched ? 1 : 0.92}
           >
             {line}
           </text>
         ))}
 
-        {/* Bottom section */}
-        <rect x="0" y="210" width="160" height="30" fill="rgba(0,0,0,0.5)" />
+        {/* ── Bottom bar — type · year ── */}
+        <rect x="0" y="218" width="160" height="22" fill="rgba(0,0,0,0.6)" />
 
-        {/* Type badge */}
-        <rect x="8" y="216" width={type.length * 6 + 8} height="14" rx="3" fill={accent} fillOpacity="0.3" />
+        {/* Universe color strip on left edge of bottom bar */}
+        <rect x="0" y="218" width="3" height="22" fill={accent} />
+
         <text
-          x={12} y={225}
+          x="10" y="230"
           dominantBaseline="middle"
           fontFamily="Arial, sans-serif"
-          fontSize="7" fontWeight="700"
-          fill={accent}
+          fontSize="7.5" fontWeight="700"
+          fill={accent} fillOpacity="0.85"
+          letterSpacing="0.5"
         >
           {type.toUpperCase()}
         </text>
 
-        {/* Year */}
         <text
-          x="152" y="225"
+          x="152" y="230"
           textAnchor="end" dominantBaseline="middle"
           fontFamily="Arial, sans-serif"
-          fontSize="9" fontWeight="700"
-          fill="white" fillOpacity="0.5"
+          fontSize="8" fontWeight="600"
+          fill="white" fillOpacity="0.4"
         >
           {year}
         </text>
@@ -233,12 +170,11 @@ export default function GeneratedPoster({ entry, watched, className = '' }) {
         {/* Watched overlay */}
         {watched && (
           <>
-            <rect x="0" y="0" width="160" height="240" fill="#E62429" fillOpacity="0.04" />
-            {/* Checkmark circle */}
-            <circle cx="138" cy="32" r="12" fill="#E62429" />
+            <rect width="160" height="240" fill="#22C55E" fillOpacity="0.04" />
+            <circle cx="139" cy="29" r="11" fill="#22C55E" fillOpacity="0.95" />
             <path
-              d="M133 32 L137 36 L143 28"
-              stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"
+              d="M134.5 29 L138 32.5 L143.5 25.5"
+              stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"
             />
           </>
         )}
