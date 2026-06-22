@@ -129,12 +129,14 @@ const TMDB_MAP = [
 async function fetchPoster(tmdbId, mediaType) {
   const url = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?language=en-US`
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${TOKEN}` },
   })
-  if (!res.ok) return null
+  if (!res.ok) {
+    console.warn(`[TMDB] ${res.status} for ${mediaType}/${tmdbId}`)
+    return null
+  }
   const data = await res.json()
-  const path = data.poster_path
-  return path ? `${IMG_BASE}${path}` : null
+  return data.poster_path ? `${IMG_BASE}${data.poster_path}` : null
 }
 
 export function useTmdbPosters() {
@@ -145,6 +147,11 @@ export function useTmdbPosters() {
   const isFresh = cache && cache._ts && (Date.now() - cache._ts) < TTL_MS
 
   const fetchAll = useCallback(async () => {
+    if (!TOKEN) {
+      console.error('[TMDB] VITE_TMDB_TOKEN is not set!')
+      return
+    }
+    console.log('[TMDB] Starting poster fetch…')
     setLoading(true)
     setProgress(0)
     const map = { _ts: Date.now() }
@@ -158,12 +165,15 @@ export function useTmdbPosters() {
       return true
     })
 
+    let fetched = 0
     for (let i = 0; i < unique.length; i++) {
       const { tmdb, type } = unique[i]
       try {
         const url = await fetchPoster(tmdb, type)
-        if (url) map[`${type}:${tmdb}`] = url
-      } catch {}
+        if (url) { map[`${type}:${tmdb}`] = url; fetched++ }
+      } catch (e) {
+        console.warn(`[TMDB] fetch error for ${type}/${tmdb}:`, e)
+      }
       setProgress(Math.round(((i + 1) / unique.length) * 100))
     }
 
@@ -173,15 +183,19 @@ export function useTmdbPosters() {
       if (url) map[`e${id}`] = url
     }
 
+    console.log(`[TMDB] Done — ${fetched}/${unique.length} posters fetched`)
     setCache(map)
     setLoading(false)
     setProgress(100)
   }, [setCache])
 
   useEffect(() => {
-    if (isFresh) return
+    if (isFresh) {
+      console.log('[TMDB] Using cached posters')
+      return
+    }
     fetchAll()
-  }, [])
+  }, [fetchAll])
 
   const getPoster = useCallback((id) => cache?.[`e${id}`] || null, [cache])
 
