@@ -127,7 +127,7 @@ export default function App() {
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
       <PosterLoadingBar loading={posterLoading} progress={progress} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-screen-xl mx-auto px-5 sm:px-8 py-10">
         {activeTab === 'dashboard'    && <Dashboard entries={entries} unlockedAchievements={unlockedAchievements} onExport={handleExport} onImport={handleImport} />}
         {activeTab === 'collections'  && <CollectionsView entries={entries} onToggle={handleToggle} />}
         {activeTab === 'entries'      && <EntriesView entries={entries} onToggle={handleToggle} getPoster={getPoster} />}

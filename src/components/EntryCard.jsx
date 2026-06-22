@@ -3,33 +3,18 @@ import { motion } from 'framer-motion'
 import { CheckCircle, Circle } from 'lucide-react'
 import GeneratedPoster from './GeneratedPoster'
 
-const TYPE_COLORS = {
-  Movie:   { bg: 'rgba(59,130,246,0.15)',  text: '#60A5FA', border: 'rgba(59,130,246,0.3)'  },
-  Series:  { bg: 'rgba(34,197,94,0.15)',   text: '#4ADE80', border: 'rgba(34,197,94,0.3)'   },
-  Special: { bg: 'rgba(168,85,247,0.15)',  text: '#C084FC', border: 'rgba(168,85,247,0.3)'  },
-}
 const UNIVERSE_COLORS = {
-  MCU:               { bg: 'rgba(230,36,41,0.15)',  text: '#F87171', border: 'rgba(230,36,41,0.3)'  },
-  'Fox X-Men':       { bg: 'rgba(245,158,11,0.15)', text: '#FCD34D', border: 'rgba(245,158,11,0.3)' },
-  'Netflix Marvel':  { bg: 'rgba(239,68,68,0.15)',  text: '#FC6161', border: 'rgba(239,68,68,0.3)'  },
-  'Sony Spider-Man': { bg: 'rgba(59,130,246,0.15)',  text: '#93C5FD', border: 'rgba(59,130,246,0.3)'  },
-  'Spider-Verse':    { bg: 'rgba(168,85,247,0.15)',  text: '#E879F9', border: 'rgba(168,85,247,0.3)'  },
+  MCU:               '#E62429',
+  'Fox X-Men':       '#F59E0B',
+  'Netflix Marvel':  '#EC4899',
+  'Sony Spider-Man': '#3B82F6',
+  'Spider-Verse':    '#A855F7',
 }
+
 const PHASE_COLORS = {
   'Pre-MCU': '#6B7280', 'Phase 1': '#3B82F6', 'Phase 2': '#8B5CF6',
   'Phase 3': '#E62429', 'Phase 4': '#10B981', 'Phase 5': '#F59E0B',
   'Phase 6': '#FFD700', 'Netflix': '#E50914',
-}
-
-function Badge({ label, colors }) {
-  return (
-    <span
-      className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold truncate max-w-full"
-      style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
-    >
-      {label}
-    </span>
-  )
 }
 
 function PosterArea({ entry, posterUrl }) {
@@ -38,93 +23,96 @@ function PosterArea({ entry, posterUrl }) {
   const showReal = !!posterUrl && !imgError
 
   return (
-    <div
-      className={`relative w-full aspect-[2/3] rounded-xl overflow-hidden ${
-        entry.watched ? 'ring-1 ring-primary/40' : ''
-      }`}
-      style={{ boxShadow: entry.watched ? '0 4px 24px rgba(230,36,41,0.18)' : 'none' }}
-    >
-      {/* Generated poster — always the base layer */}
+    <div className="relative w-full aspect-[2/3] overflow-hidden rounded-xl">
+      {/* Generated base */}
       <div className={`absolute inset-0 transition-opacity duration-500 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
         <GeneratedPoster entry={entry} watched={entry.watched} />
       </div>
 
-      {/* Real poster fades in on top */}
+      {/* Real poster */}
       {showReal && (
         <img
           src={posterUrl}
           alt={entry.title}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-            imgLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setImgLoaded(true)}
           onError={() => setImgError(true)}
         />
       )}
 
-      {/* Watched checkmark — always visible, not gated on imgLoaded */}
+      {/* Watched overlay tint */}
       {entry.watched && (
-        <div className="absolute top-2 right-2 z-30 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
-          <CheckCircle size={14} className="text-white" />
+        <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
+      )}
+
+      {/* Checkmark badge */}
+      {entry.watched && (
+        <div className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full bg-primary shadow-lg flex items-center justify-center">
+          <CheckCircle size={13} className="text-white" />
         </div>
       )}
 
-      {/* Coming soon ribbon */}
+      {/* Coming Soon ribbon */}
       {entry.upcoming && !entry.watched && (
-        <div className="absolute bottom-0 left-0 right-0 z-30 bg-black/80 text-center py-0.5">
-          <span className="text-yellow-400 text-[8px] font-bold tracking-widest uppercase">Coming Soon</span>
+        <div className="absolute bottom-0 left-0 right-0 z-20 py-1 text-center"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
+          <span className="text-yellow-400 text-[9px] font-heading font-bold tracking-widest uppercase">Coming Soon</span>
         </div>
       )}
+
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-200 flex items-center justify-center z-10">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-2">
+          {entry.watched
+            ? <CheckCircle size={28} className="text-primary drop-shadow-lg" />
+            : <Circle size={28} className="text-white/80 drop-shadow-lg" />
+          }
+          <span className="text-white text-xs font-heading font-semibold uppercase tracking-wide text-center px-3 leading-tight line-clamp-2">
+            {entry.watched ? 'Watched' : 'Mark Watched'}
+          </span>
+        </div>
+      </div>
     </div>
   )
 }
 
 export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
-  const typeColors     = TYPE_COLORS[entry.type]         || TYPE_COLORS.Movie
-  const universeColors = UNIVERSE_COLORS[entry.universe] || UNIVERSE_COLORS.MCU
-  const phaseColor     = PHASE_COLORS[entry.phase]       || '#6B7280'
-  const hours          = (entry.runtime / 60).toFixed(1)
+  const uniColor   = UNIVERSE_COLORS[entry.universe] || '#E62429'
+  const phaseColor = PHASE_COLORS[entry.phase]       || '#6B7280'
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.025, 0.5), duration: 0.3 }}
-      whileHover={{ y: -5, transition: { duration: 0.18 } }}
-      className={`relative bg-card rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer group ${
-        entry.watched ? 'border-primary/25' : 'border-white/5 hover:border-white/15'
-      }`}
+      transition={{ delay: Math.min(index * 0.02, 0.45), duration: 0.3 }}
+      className="relative group cursor-pointer"
       onClick={() => onToggle(entry.id)}
     >
-      {entry.watched && (
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none z-0" />
-      )}
-      <div className="relative z-10 p-2.5">
+      <div className={`relative rounded-xl overflow-hidden transition-all duration-250 ${
+        entry.watched
+          ? 'ring-1 ring-primary/40 shadow-[0_8px_30px_rgba(230,36,41,0.2)]'
+          : 'hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]'
+      }`}>
         <PosterArea entry={entry} posterUrl={posterUrl} />
+      </div>
 
-        <div className="mt-2.5 space-y-1.5">
-          <div className="flex items-start justify-between gap-1.5">
-            <div className="min-w-0">
-              <div className="text-white font-bold text-xs leading-tight line-clamp-2 group-hover:text-primary/90 transition-colors">
-                {entry.title}
-              </div>
-              <div className="text-white/35 text-xs mt-0.5">{entry.year} · {hours}h</div>
-            </div>
-            <button
-              onClick={e => { e.stopPropagation(); onToggle(entry.id) }}
-              className="flex-shrink-0 mt-0.5 transition-transform hover:scale-110 active:scale-95"
-            >
-              {entry.watched
-                ? <CheckCircle size={18} className="text-primary" />
-                : <Circle size={18} className="text-white/15 hover:text-white/50 transition-colors" />
-              }
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            <Badge label={entry.type}  colors={typeColors} />
-            <Badge label={entry.phase} colors={{ bg: `${phaseColor}20`, text: phaseColor, border: `${phaseColor}40` }} />
-          </div>
-          <Badge label={entry.universe} colors={universeColors} />
+      {/* Info below poster */}
+      <div className="mt-2.5 px-0.5">
+        <div className="text-white text-xs font-heading font-semibold uppercase tracking-wide leading-tight line-clamp-2 group-hover:text-primary/90 transition-colors">
+          {entry.title}
+        </div>
+        <div className="flex items-center gap-2 mt-1.5">
+          {/* Universe dot */}
+          <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: uniColor }} />
+          <span className="text-white/30 text-[10px]">{entry.year}</span>
+          <span className="text-white/15 text-[10px]">·</span>
+          {/* Phase chip */}
+          <span
+            className="text-[9px] font-heading font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
+            style={{ color: phaseColor, background: `${phaseColor}18` }}
+          >
+            {entry.phase}
+          </span>
         </div>
       </div>
     </motion.div>

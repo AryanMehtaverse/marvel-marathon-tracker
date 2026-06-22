@@ -11,7 +11,9 @@ export default {
         gold: '#FFD700',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans:    ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Bebas Neue', 'Impact', 'sans-serif'],
+        heading: ['Oswald', 'Arial Black', 'sans-serif'],
       },
       animation: {
         'pulse-red': 'pulseRed 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',

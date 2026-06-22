@@ -3,52 +3,38 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
   body {
     background-color: #0B0B0B;
     color: #FFFFFF;
     font-family: 'Inter', system-ui, sans-serif;
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     min-height: 100vh;
   }
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #161616;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #E62429;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #B11313;
-  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #E62429; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #ff3a3f; }
 }
 
 @layer utilities {
+  /* ── Glass ── */
   .glass {
-    background: rgba(22, 22, 22, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(11, 11, 11, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
-  .glass-red {
-    background: rgba(230, 36, 41, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(230, 36, 41, 0.2);
-  }
-  .glow-red {
-    box-shadow: 0 0 20px rgba(230, 36, 41, 0.3), 0 0 40px rgba(230, 36, 41, 0.1);
-  }
-  .glow-gold {
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.2);
-  }
+
+  /* ── Scrollbar hide ── */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Typography ── */
+  .font-display { font-family: 'Bebas Neue', Impact, sans-serif; }
+  .font-heading  { font-family: 'Oswald', 'Arial Black', sans-serif; }
+
+  /* ── Gradients ── */
   .text-gradient {
     background: linear-gradient(135deg, #E62429 0%, #FFD700 100%);
     -webkit-background-clip: text;
@@ -61,32 +47,85 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ── Glows ── */
+  .glow-red  { box-shadow: 0 0 30px rgba(230,36,41,0.35), 0 0 60px rgba(230,36,41,0.12); }
+  .glow-gold { box-shadow: 0 0 20px rgba(255,215,0,0.4),  0 0 40px rgba(255,215,0,0.15); }
+
+  /* ── Cards ── */
   .card-hover {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
   }
   .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(230, 36, 41, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(230,36,41,0.15);
   }
-  .progress-bar {
-    background: linear-gradient(90deg, #E62429, #FFD700);
-  }
+
+  /* ── Shimmer ── */
   .shimmer {
-    background: linear-gradient(
-      90deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.05) 50%,
-      rgba(255,255,255,0) 100%
-    );
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    animation: shimmer 1.8s infinite;
   }
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
   }
-  .no-select {
-    user-select: none;
-    -webkit-user-select: none;
+
+  /* ── Marvel red btn ── */
+  .btn-primary {
+    background: #E62429;
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: 10px 24px;
+    transition: background 0.18s, transform 0.18s;
   }
+  .btn-primary:hover { background: #ff3a3f; transform: translateY(-1px); }
+
+  .btn-ghost {
+    color: white;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    padding: 9px 22px;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    transition: border-color 0.18s, background 0.18s;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #E62429;
+  }
+
+  /* ── Red left-border section title ── */
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: white;
+    padding-left: 12px;
+    border-left: 3px solid #E62429;
+  }
+
+  .no-select { user-select: none; -webkit-user-select: none; }
+
+  /* ── Progress bar gradient ── */
+  .progress-bar { background: linear-gradient(90deg, #E62429, #FFD700); }
+
+  /* ── Poster card hover ring ── */
+  .poster-watched { outline: 2px solid rgba(230,36,41,0.7); }
 }
