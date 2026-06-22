@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle, Circle, Film, Tv, Star, ImageOff } from 'lucide-react'
+import { CheckCircle, Circle } from 'lucide-react'
+import GeneratedPoster from './GeneratedPoster'
 
 const TYPE_COLORS = {
   Movie:   { bg: 'rgba(59,130,246,0.15)',  text: '#60A5FA', border: 'rgba(59,130,246,0.3)'  },
@@ -29,38 +30,31 @@ function Badge({ label, colors }) {
   )
 }
 
-function PosterImage({ posterUrl, title, type, watched }) {
-  const [imgError, setImgError] = useState(false)
+function PosterArea({ entry, posterUrl }) {
+  const [imgError,  setImgError]  = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
-  const TypeIcon = type === 'Movie' ? Film : type === 'Series' ? Tv : Star
-  const initials  = title.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
-
   const showReal = posterUrl && !imgError
 
   return (
     <div
       className={`relative w-full aspect-[2/3] rounded-xl overflow-hidden transition-all duration-300 ${
-        watched ? 'ring-1 ring-primary/40' : ''
+        entry.watched ? 'ring-1 ring-primary/40' : ''
       }`}
-      style={{
-        background: showReal
-          ? '#000'
-          : watched
-            ? 'linear-gradient(135deg, #1a0a0a 0%, #2a0f0f 40%, #0f0f2a 100%)'
-            : 'linear-gradient(135deg, #111 0%, #1e1e1e 100%)',
-        boxShadow: watched ? '0 4px 24px rgba(230,36,41,0.2)' : 'none',
-      }}
+      style={{ boxShadow: entry.watched ? '0 4px 24px rgba(230,36,41,0.18)' : 'none' }}
     >
-      {/* Real poster */}
+      {/* Generated poster — always rendered, hidden when real poster loads */}
+      <div className={`absolute inset-0 transition-opacity duration-300 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
+        <GeneratedPoster entry={entry} watched={entry.watched} />
+      </div>
+
+      {/* Real TMDB poster on top if available */}
       {showReal && (
         <>
-          {!imgLoaded && (
-            <div className="absolute inset-0 shimmer" />
-          )}
+          {!imgLoaded && <div className="absolute inset-0 shimmer z-10" />}
           <img
             src={posterUrl}
-            alt={title}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ${
+            alt={entry.title}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 z-20 ${
               imgLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setImgLoaded(true)}
@@ -68,44 +62,15 @@ function PosterImage({ posterUrl, title, type, watched }) {
           />
         </>
       )}
-
-      {/* Placeholder */}
-      {!showReal && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: watched ? 'rgba(230,36,41,0.2)' : 'rgba(255,255,255,0.05)' }}
-          >
-            <TypeIcon size={20} style={{ color: watched ? '#E62429' : '#ffffff25' }} />
-          </div>
-          <span className="text-base font-black" style={{ color: watched ? '#E62429' : '#ffffff15' }}>
-            {initials}
-          </span>
-        </div>
-      )}
-
-      {/* Gradient overlay at bottom (always shown over real poster) */}
-      {showReal && imgLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
-      )}
-
-      {/* Watched checkmark */}
-      {watched && (
-        <div className="absolute top-2 right-2 z-10">
-          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
-            <CheckCircle size={14} className="text-white" />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
-  const typeColors    = TYPE_COLORS[entry.type]    || TYPE_COLORS.Movie
+  const typeColors     = TYPE_COLORS[entry.type]      || TYPE_COLORS.Movie
   const universeColors = UNIVERSE_COLORS[entry.universe] || UNIVERSE_COLORS.MCU
-  const phaseColor    = PHASE_COLORS[entry.phase] || '#6B7280'
-  const hours         = (entry.runtime / 60).toFixed(1)
+  const phaseColor     = PHASE_COLORS[entry.phase]   || '#6B7280'
+  const hours          = (entry.runtime / 60).toFixed(1)
 
   return (
     <motion.div
@@ -123,7 +88,7 @@ export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
       )}
 
       <div className="relative z-10 p-2.5">
-        <PosterImage posterUrl={posterUrl} title={entry.title} type={entry.type} watched={entry.watched} />
+        <PosterArea entry={entry} posterUrl={posterUrl} />
 
         <div className="mt-2.5 space-y-1.5">
           <div className="flex items-start justify-between gap-1.5">

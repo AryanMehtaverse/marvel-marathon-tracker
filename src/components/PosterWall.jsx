@@ -2,98 +2,62 @@ import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle, Circle } from 'lucide-react'
 import SearchAndFilters from './SearchAndFilters'
+import GeneratedPoster from './GeneratedPoster'
 
 const DEFAULT_FILTERS = { search: '', type: 'All', status: 'All', universe: 'All' }
 
 function PosterCard({ entry, onToggle, posterUrl, index }) {
-  const [imgError, setImgError] = useState(false)
+  const [imgError,  setImgError]  = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
-  const initials = entry.title.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()
   const showReal = posterUrl && !imgError
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: Math.min(index * 0.01, 0.4) }}
-      whileHover={{ scale: 1.06, zIndex: 20 }}
+      transition={{ delay: Math.min(index * 0.008, 0.35) }}
+      whileHover={{ scale: 1.08, zIndex: 20 }}
       className="relative group cursor-pointer"
       style={{ zIndex: 1 }}
       onClick={() => onToggle(entry.id)}
     >
       <div
-        className="relative aspect-[2/3] rounded-xl overflow-hidden transition-all duration-200"
+        className="relative aspect-[2/3] rounded-lg overflow-hidden transition-all duration-200"
         style={{
-          border: entry.watched ? '2px solid rgba(230,36,41,0.6)' : '1px solid rgba(255,255,255,0.06)',
-          boxShadow: entry.watched ? '0 4px 24px rgba(230,36,41,0.25)' : 'none',
-          background: '#111',
+          boxShadow: entry.watched ? '0 4px 20px rgba(230,36,41,0.3)' : 'none',
+          outline: entry.watched ? '2px solid rgba(230,36,41,0.5)' : 'none',
         }}
       >
-        {/* Real poster */}
+        {/* Generated poster (always present as base) */}
+        <div className={`absolute inset-0 transition-opacity duration-300 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
+          <GeneratedPoster entry={entry} watched={entry.watched} />
+        </div>
+
+        {/* Real poster overlay */}
         {showReal && (
           <>
-            {!imgLoaded && <div className="absolute inset-0 shimmer" />}
+            {!imgLoaded && <div className="absolute inset-0 shimmer z-10" />}
             <img
               src={posterUrl}
               alt={entry.title}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                imgLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`absolute inset-0 w-full h-full object-cover z-20 transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
             />
           </>
         )}
 
-        {/* Placeholder fallback */}
-        {!showReal && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center"
-            style={{
-              background: entry.watched
-                ? 'linear-gradient(135deg, #1a0a0a 0%, #2a0f0f 50%, #0a0a1a 100%)'
-                : 'linear-gradient(135deg, #111 0%, #1a1a1a 100%)',
-            }}
-          >
-            <span className="text-xl font-black" style={{ color: entry.watched ? '#E62429' : '#ffffff15' }}>
-              {initials}
-            </span>
-          </div>
-        )}
-
         {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2 px-2">
+        <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex flex-col items-center justify-center gap-1.5 px-2 z-30">
           {entry.watched
-            ? <CheckCircle size={24} className="text-primary drop-shadow-lg" />
-            : <Circle size={24} className="text-white/80 drop-shadow-lg" />
+            ? <CheckCircle size={20} className="text-primary drop-shadow-lg" />
+            : <Circle size={20} className="text-white/80 drop-shadow-lg" />
           }
           <span className="text-white text-xs font-semibold text-center leading-tight line-clamp-3">
             {entry.title}
           </span>
+          <span className="text-white/40 text-xs">{entry.year}</span>
         </div>
-
-        {/* Watched badge */}
-        {entry.watched && (
-          <div className="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow">
-            <CheckCircle size={11} className="text-white" />
-          </div>
-        )}
-
-        {/* Year at bottom */}
-        {(!showReal || imgLoaded) && (
-          <div className="absolute bottom-1.5 left-1.5 z-10">
-            <span className="text-xs font-semibold text-white/50 bg-black/60 rounded px-1 py-0.5">
-              {entry.year}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Title below poster */}
-      <div className="mt-1.5 px-0.5">
-        <p className="text-xs font-medium text-white/60 group-hover:text-white transition-colors leading-tight line-clamp-2">
-          {entry.title}
-        </p>
       </div>
     </motion.div>
   )
@@ -127,13 +91,13 @@ export default function PosterWall({ entries, onToggle, getPoster }) {
           <div className="text-white/20 font-semibold">No entries match your filters</div>
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
           {filtered.map((entry, i) => (
             <PosterCard
               key={entry.id}
               entry={entry}
               onToggle={onToggle}
-              posterUrl={getPoster(entry.id)}
+              posterUrl={getPoster ? getPoster(entry.id) : null}
               index={i}
             />
           ))}
