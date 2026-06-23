@@ -1,14 +1,74 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Play, Clock, CheckCircle2, Flame, Star, TrendingUp, Download, Upload, ChevronRight, Zap } from 'lucide-react'
+import { Play, Clock, CheckCircle2, Star, TrendingUp, Download, Upload, ChevronRight } from 'lucide-react'
 import AnimatedCounter from './AnimatedCounter'
 import GoalTracker from './GoalTracker'
 import Milestones from './Milestones'
 import ProgressTracker from './ProgressTracker'
+import GeneratedPoster from './GeneratedPoster'
 
 const UNIVERSE_COLOR = {
   MCU: '#E62429', 'Fox X-Men': '#F59E0B', 'Netflix Marvel': '#EC4899',
   'Sony Spider-Man': '#3B82F6', 'Spider-Verse': '#A855F7',
+}
+
+// UTC timestamps for upcoming releases (IST = UTC+5:30, so noon IST = 06:30 UTC)
+const RELEASE_DATES = [
+  { id: 83, title: 'Spider-Man: Brand New Day',    utc: Date.UTC(2026,  6, 25,  6, 30) }, // Jul 25 2026 noon IST
+  { id: 81, title: 'Daredevil: Born Again S2',     utc: Date.UTC(2026,  8, 18,  6, 30) }, // Sep 18 2026 noon IST
+  { id: 82, title: 'The Punisher: One Last Kill',  utc: Date.UTC(2026, 10,  6,  6, 30) }, // Nov 06 2026 noon IST
+]
+
+function useCountdown(utcMs) {
+  const getRemaining = () => {
+    const diff = utcMs - Date.now()
+    if (diff <= 0) return null
+    const days    = Math.floor(diff / 86400000)
+    const hours   = Math.floor((diff % 86400000) / 3600000)
+    const minutes = Math.floor((diff % 3600000)  / 60000)
+    const seconds = Math.floor((diff % 60000)    / 1000)
+    return { days, hours, minutes, seconds }
+  }
+  const [remaining, setRemaining] = useState(getRemaining)
+  useEffect(() => {
+    const id = setInterval(() => setRemaining(getRemaining()), 1000)
+    return () => clearInterval(id)
+  }, [utcMs])
+  return remaining
+}
+
+function CountdownChip({ title, utc }) {
+  const rem = useCountdown(utc)
+  if (!rem) return null
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className="inline-flex items-center gap-3 bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl px-4 py-2.5 mt-4"
+    >
+      <div className="flex flex-col">
+        <span className="text-white/40 text-[10px] font-heading uppercase tracking-widest leading-none mb-1">
+          Next release · IST
+        </span>
+        <span className="text-white font-heading font-bold text-sm truncate max-w-[160px]">{title}</span>
+      </div>
+      <div className="h-6 w-px bg-white/10" />
+      <div className="flex items-end gap-2">
+        {[
+          { v: rem.days,    l: 'd'  },
+          { v: rem.hours,   l: 'h'  },
+          { v: rem.minutes, l: 'm'  },
+          { v: rem.seconds, l: 's'  },
+        ].map(({ v, l }) => (
+          <div key={l} className="flex flex-col items-center leading-none">
+            <span className="font-display text-primary text-2xl leading-none tabular-nums">{String(v).padStart(2, '0')}</span>
+            <span className="text-white/30 text-[9px] font-heading uppercase tracking-widest mt-0.5">{l}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  )
 }
 
 function StatPill({ icon: Icon, label, value, color, suffix = '', delay = 0 }) {
@@ -33,7 +93,151 @@ function StatPill({ icon: Icon, label, value, color, suffix = '', delay = 0 }) {
   )
 }
 
-export default function Dashboard({ entries, unlockedAchievements, onExport, onImport }) {
+function UniverseBreakdown({ entries }) {
+  const universes = [
+    { key: 'MCU',             label: 'MCU'          },
+    { key: 'Netflix Marvel',  label: 'Netflix'       },
+    { key: 'Fox X-Men',       label: 'Fox X-Men'     },
+    { key: 'Sony Spider-Man', label: 'Sony'          },
+    { key: 'Spider-Verse',    label: 'Spider-Verse'  },
+  ]
+  return (
+    <div className="space-y-3">
+      {universes.map(({ key, label }) => {
+        const all     = entries.filter(e => e.universe === key)
+        const done    = all.filter(e => e.watched).length
+        const pct     = all.length > 0 ? Math.round((done / all.length) * 100) : 0
+        const color   = UNIVERSE_COLOR[key] || '#6B7280'
+        return (
+          <div key={key} className="flex items-center gap-3">
+            <div className="w-24 text-right text-white/40 text-xs font-medium flex-shrink-0">{label}</div>
+            <div className="flex-1 h-2 bg-white/6 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: color }}
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+              />
+            </div>
+            <div className="w-16 text-white/30 text-xs flex-shrink-0">
+              {done}/{all.length} <span className="text-white/15">({pct}%)</span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function RecentlyWatched({ entries, watchedIds, getPoster }) {
+  // Last 5 watched in the order they were added (end of watchedIds array = most recent)
+  const recent = [...watchedIds]
+    .reverse()
+    .slice(0, 5)
+    .map(id => entries.find(e => e.id === id))
+    .filter(Boolean)
+
+  if (recent.length === 0) return (
+    <div className="text-white/20 text-sm text-center py-6">Nothing watched yet — start your marathon!</div>
+  )
+
+  return (
+    <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+      {recent.map((entry, i) => {
+        const posterUrl = getPoster?.(entry.id)
+        return (
+          <motion.div
+            key={entry.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.06 }}
+            className="flex-shrink-0 flex flex-col gap-1.5"
+          >
+            <div className="relative w-20 aspect-[2/3] rounded-xl overflow-hidden ring-1 ring-primary/30">
+              <RecentPoster entry={entry} posterUrl={posterUrl} />
+              <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                <CheckCircle2 size={9} className="text-white" />
+              </div>
+            </div>
+            <div className="text-white/40 text-[9px] font-medium truncate w-20 text-center leading-tight">{entry.title}</div>
+          </motion.div>
+        )
+      })}
+    </div>
+  )
+}
+
+function RecentPoster({ entry, posterUrl }) {
+  const [imgError,  setImgError]  = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
+  const showReal = posterUrl && !imgError
+  return (
+    <>
+      <div className={`absolute inset-0 transition-opacity duration-300 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
+        <GeneratedPoster entry={entry} watched />
+      </div>
+      {showReal && (
+        <img
+          src={posterUrl}
+          alt={entry.title}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
+        />
+      )}
+    </>
+  )
+}
+
+function ContinueWatching({ entries, onToggle }) {
+  // Next 3 unwatched, skip upcoming if no non-upcoming available
+  const queue = entries.filter(e => !e.watched).slice(0, 3)
+  if (queue.length === 0) return null
+
+  return (
+    <div className="space-y-2">
+      {queue.map((entry, i) => {
+        const color = UNIVERSE_COLOR[entry.universe] || '#E62429'
+        return (
+          <motion.div
+            key={entry.id}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.08 }}
+            onClick={() => onToggle(entry.id)}
+            className="flex items-center gap-4 p-4 rounded-2xl border border-white/6 bg-white/2 hover:bg-white/5 hover:border-white/10 transition-all group cursor-pointer"
+          >
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 font-display text-lg"
+              style={{ background: `${color}18`, color }}
+            >
+              {i + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-white font-heading font-semibold text-sm uppercase tracking-wide truncate group-hover:text-primary/90 transition-colors">
+                {entry.title}
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-xs font-medium" style={{ color }}>{entry.universe}</span>
+                <span className="text-white/20 text-xs">·</span>
+                <span className="text-white/30 text-xs">{entry.year}</span>
+                <span className="text-white/20 text-xs">·</span>
+                <span className="text-white/30 text-xs">{(entry.runtime / 60).toFixed(1)}h</span>
+                {entry.upcoming && (
+                  <span className="text-[9px] font-bold text-yellow-400 bg-yellow-500/12 px-1.5 py-0.5 rounded border border-yellow-500/20">SOON</span>
+                )}
+              </div>
+            </div>
+            <Play size={14} className="text-white/20 group-hover:text-primary transition-colors flex-shrink-0" />
+          </motion.div>
+        )
+      })}
+    </div>
+  )
+}
+
+export default function Dashboard({ entries, watchedIds, unlockedAchievements, onExport, onImport, onToggle, getPoster }) {
   const importRef = useRef(null)
 
   const total          = entries.length
@@ -41,12 +245,11 @@ export default function Dashboard({ entries, unlockedAchievements, onExport, onI
   const pct            = total > 0 ? Math.round((watched / total) * 100) : 0
   const watchedHours   = Math.round(entries.filter(e => e.watched).reduce((s, e) => s + e.runtime, 0) / 60)
   const remainingHours = Math.round(entries.filter(e => !e.watched).reduce((s, e) => s + e.runtime, 0) / 60)
-  const nextEntry      = entries.find(e => !e.watched)
 
-  let streak = 0, leadStreak = 0
-  for (let i = entries.length - 1; i >= 0; i--) { if (entries[i].watched) streak++; else break }
-  for (const e of entries) { if (e.watched) leadStreak++; else break }
-  streak = Math.max(streak, leadStreak)
+  // Find the next upcoming release still in the future
+  const nextRelease = RELEASE_DATES
+    .filter(r => r.utc > Date.now())
+    .sort((a, b) => a.utc - b.utc)[0] ?? null
 
   return (
     <div className="space-y-10">
@@ -57,13 +260,9 @@ export default function Dashboard({ entries, unlockedAchievements, onExport, onI
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
         className="relative overflow-hidden rounded-3xl min-h-[300px] sm:min-h-[360px] flex items-end"
-        style={{
-          background: 'linear-gradient(135deg, #1a0005 0%, #0d0000 40%, #0B0B0B 100%)',
-        }}
+        style={{ background: 'linear-gradient(135deg, #1a0005 0%, #0d0000 40%, #0B0B0B 100%)' }}
       >
-        {/* Background art */}
         <div className="absolute inset-0 pointer-events-none">
-          {/* Grid lines */}
           <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -72,16 +271,11 @@ export default function Dashboard({ entries, unlockedAchievements, onExport, onI
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
           </svg>
-
-          {/* Glow orbs */}
           <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-primary opacity-[0.08] blur-[80px]" />
           <div className="absolute bottom-0 left-1/3 w-64 h-64 rounded-full bg-primary opacity-[0.05] blur-[60px]" />
-
-          {/* Red accent stripe */}
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary" />
         </div>
 
-        {/* Content */}
         <div className="relative z-10 p-8 sm:p-12 w-full">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -90,10 +284,9 @@ export default function Dashboard({ entries, unlockedAchievements, onExport, onI
           >
             <div className="section-label mb-3">Your Marvel Journey</div>
             <h1 className="font-display text-6xl sm:text-8xl text-white leading-none mb-2">
-              MARVEL
-              <span className="text-primary"> MARATHON</span>
+              MARVEL<span className="text-primary"> MARATHON</span>
             </h1>
-            <p className="text-white/40 text-sm max-w-md mb-8 font-sans">
+            <p className="text-white/40 text-sm max-w-md mb-6 font-sans">
               Tracking every Marvel story — from X-Men (2000) to Avengers: Doomsday (2026) and beyond.
             </p>
 
@@ -107,8 +300,6 @@ export default function Dashboard({ entries, unlockedAchievements, onExport, onI
                   {watched} of {total} titles watched
                 </div>
               </div>
-
-              {/* Progress bar */}
               <div className="flex-1 min-w-[160px] mb-3">
                 <div className="h-2 bg-white/8 rounded-full overflow-hidden">
                   <motion.div
@@ -124,57 +315,47 @@ export default function Dashboard({ entries, unlockedAchievements, onExport, onI
                 </div>
               </div>
             </div>
+
+            {/* Countdown chip */}
+            {nextRelease && (
+              <CountdownChip title={nextRelease.title} utc={nextRelease.utc} />
+            )}
           </motion.div>
         </div>
       </motion.div>
 
-      {/* ── Up Next card ─────────────────────────────────────────── */}
-      {nextEntry && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="flex items-center gap-5 p-5 rounded-2xl border border-white/8 bg-white/3 hover:bg-white/5 transition-all group"
-        >
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: `${UNIVERSE_COLOR[nextEntry.universe] || '#E62429'}20` }}
-          >
-            <Play size={20} style={{ color: UNIVERSE_COLOR[nextEntry.universe] || '#E62429' }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="section-label mb-0.5">Up Next</div>
-            <div className="text-white font-heading font-bold text-lg uppercase tracking-wide truncate">{nextEntry.title}</div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-              <span className="text-white/35 text-xs">{nextEntry.year}</span>
-              <span className="text-white/35 text-xs">{nextEntry.type}</span>
-              <span className="text-white/35 text-xs">{nextEntry.phase}</span>
-              <span className="text-white/35 text-xs">{(nextEntry.runtime / 60).toFixed(1)}h</span>
-              {nextEntry.upcoming && (
-                <span className="text-xs font-bold text-yellow-400 bg-yellow-500/12 px-2 py-0.5 rounded border border-yellow-500/25">Coming Soon</span>
-              )}
-            </div>
-          </div>
-          <ChevronRight size={18} className="text-white/20 group-hover:text-white/50 transition-colors flex-shrink-0" />
-        </motion.div>
-      )}
+      {/* ── Continue Watching ─────────────────────────────────────── */}
+      <div>
+        <div className="section-title mb-4">Continue Watching</div>
+        <ContinueWatching entries={entries} onToggle={onToggle} />
+      </div>
+
+      {/* ── Recently Watched ──────────────────────────────────────── */}
+      <div>
+        <div className="section-title mb-4">Recently Watched</div>
+        <RecentlyWatched entries={entries} watchedIds={watchedIds} getPoster={getPoster} />
+      </div>
 
       {/* ── Stats grid ────────────────────────────────────────────── */}
       <div>
         <div className="section-title mb-5">Overview</div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          <StatPill icon={CheckCircle2} label="Watched"    value={watched}        color="#22C55E" delay={0.05} />
-          <StatPill icon={Clock}        label="Hours In"   value={watchedHours}   color="#F59E0B" delay={0.1}  suffix="h" />
-          <StatPill icon={TrendingUp}   label="Complete"   value={pct}            color="#E62429" delay={0.15} suffix="%" />
-          <StatPill icon={Flame}        label="Streak"     value={streak}         color="#EF4444" delay={0.2} />
-          <StatPill icon={Clock}        label="Remaining"  value={remainingHours} color="#3B82F6" delay={0.25} suffix="h" />
-          <StatPill icon={Star}         label="Achievements" value={unlockedAchievements.length} color="#FFD700" delay={0.3} />
-          <StatPill icon={Zap}          label="Total"      value={total}          color="#8B5CF6" delay={0.35} />
-          <StatPill icon={TrendingUp}   label="Remaining"  value={total - watched} color="#6B7280" delay={0.4} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatPill icon={CheckCircle2} label="Watched"      value={watched}                    color="#22C55E" delay={0.05} />
+          <StatPill icon={Clock}        label="Hours In"     value={watchedHours}               color="#F59E0B" delay={0.1}  suffix="h" />
+          <StatPill icon={TrendingUp}   label="Remaining"    value={total - watched}            color="#3B82F6" delay={0.15} />
+          <StatPill icon={Star}         label="Achievements" value={unlockedAchievements.length} color="#FFD700" delay={0.2} />
         </div>
       </div>
 
-      {/* ── Progress tracker ─────────────────────────────────────── */}
+      {/* ── Universe breakdown ────────────────────────────────────── */}
+      <div>
+        <div className="section-title mb-5">Universe Progress</div>
+        <div className="bg-card rounded-2xl border border-white/5 p-5">
+          <UniverseBreakdown entries={entries} />
+        </div>
+      </div>
+
+      {/* ── Phase Progress ────────────────────────────────────────── */}
       <div>
         <div className="section-title mb-5">Phase Progress</div>
         <ProgressTracker watched={watched} total={total} />

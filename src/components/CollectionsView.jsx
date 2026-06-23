@@ -144,13 +144,18 @@ const COLLECTIONS = [
 ]
 
 // ── Small poster card for the row ─────────────────────────────────────────────
-function MiniCard({ entry, onToggle, index }) {
+function MiniCard({ entry, onToggle, getPoster, index }) {
+  const [imgError,  setImgError]  = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
+  const posterUrl = getPoster ? getPoster(entry.id) : null
+  const showReal  = posterUrl && !imgError
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: Math.min(index * 0.03, 0.4) }}
-      whileHover={{ scale: 1.08, zIndex: 20 }}
+      whileHover={{ scale: 1.06, zIndex: 20 }}
       className="relative flex-shrink-0 w-24 sm:w-28 cursor-pointer group"
       style={{ zIndex: 1 }}
       onClick={() => onToggle(entry.id)}
@@ -162,7 +167,21 @@ function MiniCard({ entry, onToggle, index }) {
           boxShadow: entry.watched ? '0 4px 16px rgba(230,36,41,0.25)' : 'none',
         }}
       >
-        <GeneratedPoster entry={entry} watched={entry.watched} />
+        {/* Generated base always present */}
+        <div className={`absolute inset-0 transition-opacity duration-300 ${showReal && imgLoaded ? 'opacity-0' : 'opacity-100'}`}>
+          <GeneratedPoster entry={entry} watched={entry.watched} />
+        </div>
+
+        {/* Real poster */}
+        {showReal && (
+          <img
+            src={posterUrl}
+            alt={entry.title}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+          />
+        )}
 
         {entry.watched && (
           <div className="absolute top-1 right-1 z-30 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
@@ -193,7 +212,7 @@ function MiniCard({ entry, onToggle, index }) {
 }
 
 // ── Detail modal ──────────────────────────────────────────────────────────────
-function CollectionModal({ collection, entries, onToggle, onClose }) {
+function CollectionModal({ collection, entries, onToggle, getPoster, onClose }) {
   const items = entries.filter(collection.filter)
   const watched = items.filter(e => e.watched).length
   const pct = items.length > 0 ? Math.round((watched / items.length) * 100) : 0
@@ -246,7 +265,7 @@ function CollectionModal({ collection, entries, onToggle, onClose }) {
         <div className="overflow-y-auto p-5">
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
             {items.map((entry, i) => (
-              <MiniCard key={entry.id} entry={entry} onToggle={onToggle} index={i} />
+              <MiniCard key={entry.id} entry={entry} onToggle={onToggle} getPoster={getPoster} index={i} />
             ))}
           </div>
         </div>
@@ -256,7 +275,7 @@ function CollectionModal({ collection, entries, onToggle, onClose }) {
 }
 
 // ── Horizontal row ────────────────────────────────────────────────────────────
-function CollectionRow({ collection, entries, onToggle, onExpand }) {
+function CollectionRow({ collection, entries, onToggle, getPoster, onExpand }) {
   const items = useMemo(() => entries.filter(collection.filter), [entries, collection])
   const watched = items.filter(e => e.watched).length
   const pct = items.length > 0 ? Math.round((watched / items.length) * 100) : 0
@@ -297,7 +316,7 @@ function CollectionRow({ collection, entries, onToggle, onExpand }) {
       {/* Horizontal scroll */}
       <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
         {items.map((entry, i) => (
-          <MiniCard key={entry.id} entry={entry} onToggle={onToggle} index={i} />
+          <MiniCard key={entry.id} entry={entry} onToggle={onToggle} getPoster={getPoster} index={i} />
         ))}
       </div>
     </div>
@@ -305,7 +324,7 @@ function CollectionRow({ collection, entries, onToggle, onExpand }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function CollectionsView({ entries, onToggle }) {
+export default function CollectionsView({ entries, onToggle, getPoster }) {
   const [activeModal, setActiveModal] = useState(null)
 
   const totalWatched = entries.filter(e => e.watched).length
@@ -329,6 +348,7 @@ export default function CollectionsView({ entries, onToggle }) {
             collection={col}
             entries={entries}
             onToggle={onToggle}
+            getPoster={getPoster}
             onExpand={setActiveModal}
           />
         ))}
@@ -341,6 +361,7 @@ export default function CollectionsView({ entries, onToggle }) {
             collection={activeModal}
             entries={entries}
             onToggle={onToggle}
+            getPoster={getPoster}
             onClose={() => setActiveModal(null)}
           />
         )}

@@ -22,7 +22,7 @@ function ProgressBar({ current, total }) {
   )
 }
 
-export default function Achievements({ entries, unlockedAchievements }) {
+export default function Achievements({ entries, unlockedAchievements, onReset }) {
   // Sort: unlocked first, then locked
   const sorted = [...ACHIEVEMENTS_DEF].sort((a, b) => {
     const au = unlockedAchievements.includes(a.id)
@@ -36,7 +36,15 @@ export default function Achievements({ entries, unlockedAchievements }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-white font-bold text-xl">Achievements</h2>
-        <span className="text-white/30 text-sm">{unlockedAchievements.length}/{ACHIEVEMENTS_DEF.length} unlocked</span>
+        <div className="flex items-center gap-3">
+          <span className="text-white/30 text-sm">{unlockedAchievements.length}/{ACHIEVEMENTS_DEF.length} unlocked</span>
+          <button
+            onClick={() => { if (window.confirm('Reset all achievements? This cannot be undone.')) onReset() }}
+            className="text-white/20 hover:text-red-400 text-xs transition-colors border border-white/10 hover:border-red-500/30 px-2 py-1 rounded-lg"
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
       {/* Progress summary */}

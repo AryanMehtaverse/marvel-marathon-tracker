@@ -128,13 +128,13 @@ export default function App() {
       <PosterLoadingBar loading={posterLoading} progress={progress} />
 
       <main className="max-w-screen-xl mx-auto px-5 sm:px-8 py-10">
-        {activeTab === 'dashboard'    && <Dashboard entries={entries} unlockedAchievements={unlockedAchievements} onExport={handleExport} onImport={handleImport} />}
-        {activeTab === 'collections'  && <CollectionsView entries={entries} onToggle={handleToggle} />}
+        {activeTab === 'dashboard'    && <Dashboard entries={entries} watchedIds={watchedIds} unlockedAchievements={unlockedAchievements} onExport={handleExport} onImport={handleImport} onToggle={handleToggle} getPoster={getPoster} />}
+        {activeTab === 'collections'  && <CollectionsView entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'entries'      && <EntriesView entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'timeline'     && <TimelineView entries={entries} onToggle={handleToggle} />}
         {activeTab === 'posterwall'   && <PosterWall entries={entries} onToggle={handleToggle} getPoster={getPoster} />}
         {activeTab === 'stats'        && <StatsView entries={entries} />}
-        {activeTab === 'achievements' && <Achievements entries={entries} unlockedAchievements={unlockedAchievements} />}
+        {activeTab === 'achievements' && <Achievements entries={entries} unlockedAchievements={unlockedAchievements} onReset={() => setUnlockedAchievements([])} />}
         {activeTab === 'watchguide'   && <WatchGuide entries={entries} onToggle={handleToggle} />}
       </main>
 
