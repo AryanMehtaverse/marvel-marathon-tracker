@@ -206,16 +206,19 @@ function ContinueWatching({ entries, onToggle }) {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.08 }}
-            onClick={() => onToggle(entry.id)}
-            className="flex items-center gap-4 p-4 rounded-2xl border border-white/6 bg-white/2 hover:bg-white/5 hover:border-white/10 transition-all group cursor-pointer"
+            className="flex items-center gap-4 p-4 rounded-2xl border border-white/6 bg-white/2 hover:bg-white/5 hover:border-white/10 transition-all group"
           >
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 font-display text-lg"
+            {/* Clicking the number badge marks as watched */}
+            <button
+              onClick={() => onToggle(entry.id)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 font-display text-lg hover:scale-110 transition-transform cursor-pointer"
               style={{ background: `${color}18`, color }}
+              title="Mark as watched"
             >
               {i + 1}
-            </div>
-            <div className="flex-1 min-w-0">
+            </button>
+            {/* Title area — clicking marks watched too */}
+            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onToggle(entry.id)}>
               <div className="text-white font-heading font-semibold text-sm uppercase tracking-wide truncate group-hover:text-primary/90 transition-colors">
                 {entry.title}
               </div>
@@ -230,7 +233,8 @@ function ContinueWatching({ entries, onToggle }) {
                 )}
               </div>
             </div>
-            <WatchOnTVButton entry={entry} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Watch on TV — separate, never triggers toggle */}
+            <WatchOnTVButton entry={entry} />
           </motion.div>
         )
       })}

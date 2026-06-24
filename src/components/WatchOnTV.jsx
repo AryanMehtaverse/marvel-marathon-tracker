@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Tv, Smartphone, ExternalLink } from 'lucide-react'
 
-// Build the Google TV search URL for a given title + year
+// Google search URL — opens Google's streaming panel which has a direct
+// "Watch on Google TV" button. On Android with Google TV app installed,
+// tapping that button deep-links into the app.
 function googleTvUrl(title, year) {
-  const q = encodeURIComponent(`${title} ${year}`)
-  // tv.google.com URLs are intercepted by the Google TV app on Android
-  return `https://tv.google.com/search?q=${q}`
+  const q = encodeURIComponent(`${title} ${year} watch on google tv`)
+  return `https://www.google.com/search?q=${q}`
 }
 
 // QR code image via Google Charts API (no npm needed, no key needed)
