@@ -2,17 +2,23 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Tv, Smartphone, ExternalLink } from 'lucide-react'
 
-// Opens Play Store movie search on Android — Play Store is Google TV's catalog.
-// Tapping the movie there lands directly on the detail page shown in Google TV app.
-function googleTvUrl(title, year) {
-  const q = encodeURIComponent(`${title} ${year}`)
-  return `https://play.google.com/store/search?q=${q}&c=movies`
+// Android Intent URL — opens Google TV app (com.google.android.videos) to search.
+// Falls back to tv.google.com if intent isn't handled.
+function intentUrl(title, year) {
+  const q   = encodeURIComponent(`${title} ${year}`)
+  const web = encodeURIComponent(`https://tv.google.com/search?q=${q}`)
+  return `intent://search?q=${q}#Intent;scheme=googletv;package=com.google.android.videos;S.browser_fallback_url=${web};end`
 }
 
-// QR code image via Google Charts API (no npm needed, no key needed)
+// QR code encodes the tv.google.com URL — intent:// doesn't scan well with cameras.
+// Android intercepts tv.google.com and opens the Google TV app.
+function webUrl(title, year) {
+  const q = encodeURIComponent(`${title} ${year}`)
+  return `https://tv.google.com/search?q=${q}`
+}
+
 function qrImageUrl(url) {
-  const encoded = encodeURIComponent(url)
-  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encoded}`
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(url)}`
 }
 
 function isMobile() {
@@ -21,15 +27,13 @@ function isMobile() {
 
 export function WatchOnTVButton({ entry, className = '' }) {
   const [open, setOpen] = useState(false)
-  const tvUrl = googleTvUrl(entry.title, entry.year)
 
   const handleClick = (e) => {
     e.stopPropagation()
     if (isMobile()) {
-      // On mobile: open Google TV directly
-      window.open(tvUrl, '_blank', 'noopener')
+      // Intent URL directly opens Google TV app search on Android
+      window.location.href = intentUrl(entry.title, entry.year)
     } else {
-      // On desktop: show QR modal
       setOpen(true)
     }
   }
@@ -46,15 +50,17 @@ export function WatchOnTVButton({ entry, className = '' }) {
 
       <AnimatePresence>
         {open && (
-          <WatchModal entry={entry} tvUrl={tvUrl} onClose={() => setOpen(false)} />
+          <WatchModal entry={entry} onClose={() => setOpen(false)} />
         )}
       </AnimatePresence>
     </>
   )
 }
 
-function WatchModal({ entry, tvUrl, onClose }) {
-  // Close on Escape
+function WatchModal({ entry, onClose }) {
+  const qrUrl  = webUrl(entry.title, entry.year)      // for QR — camera-friendly
+  const tapUrl = intentUrl(entry.title, entry.year)   // for "Open on this device"
+
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -79,15 +85,10 @@ function WatchModal({ entry, tvUrl, onClose }) {
         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-white/30 hover:text-white/70 transition-colors"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-white/30 hover:text-white/70 transition-colors">
           <X size={18} />
         </button>
 
-        {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
             <Tv size={18} className="text-primary" />
@@ -102,32 +103,28 @@ function WatchModal({ entry, tvUrl, onClose }) {
         <div className="flex flex-col items-center gap-3 mb-5">
           <div className="bg-white p-2 rounded-2xl shadow-lg">
             <img
-              src={qrImageUrl(tvUrl)}
+              src={qrImageUrl(qrUrl)}
               alt="QR code"
               width={220}
               height={220}
               className="rounded-xl block"
             />
           </div>
-
           <div className="flex items-center gap-2 text-white/40 text-xs text-center">
             <Smartphone size={13} />
-            <span>Scan → Play Store opens → tap the movie → Watch Now</span>
+            <span>Scan with phone camera → opens Google TV app</span>
           </div>
         </div>
 
-        {/* Divider */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 h-px bg-white/8" />
           <span className="text-white/20 text-xs">or</span>
           <div className="flex-1 h-px bg-white/8" />
         </div>
 
-        {/* Direct link fallback */}
+        {/* Opens Google TV app via intent on Android */}
         <a
-          href={tvUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={tapUrl}
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary hover:bg-primary/80 text-white font-bold text-sm transition-colors"
         >
           <ExternalLink size={14} />
@@ -135,7 +132,7 @@ function WatchModal({ entry, tvUrl, onClose }) {
         </a>
 
         <p className="text-white/20 text-[10px] text-center mt-3 leading-relaxed">
-          Opens Play Store movie search on Android. Tap the movie → Watch Now → starts on your TV.
+          Opens Google TV app search directly on Android.
         </p>
       </motion.div>
     </motion.div>
