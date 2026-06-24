@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Tv, Smartphone, ExternalLink } from 'lucide-react'
 
 function searchUrl(title, year) {
-  const q = encodeURIComponent(`${title} ${year} watch`)
-  return `https://www.google.com/search?q=${q}`
+  const q = encodeURIComponent(`${title} ${year}`)
+  return `https://tv.google.com/search?q=${q}`
 }
 
 function qrImageUrl(url) {
@@ -89,7 +89,7 @@ function WatchModal({ entry, url, onClose }) {
           </div>
           <div className="flex items-start gap-2 text-white/40 text-xs text-center px-2">
             <Smartphone size={13} className="flex-shrink-0 mt-0.5" />
-            <span>Scan → Google shows all streaming services → tap <strong className="text-white/60">Watch</strong> on any service → tap <strong className="text-white/60">TV nearby</strong> to cast</span>
+            <span>Scan → opens Google TV app on your phone → search for the movie</span>
           </div>
         </div>
 
@@ -106,7 +106,7 @@ function WatchModal({ entry, url, onClose }) {
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary hover:bg-primary/80 text-white font-bold text-sm transition-colors"
         >
           <ExternalLink size={14} />
-          Open Google Search
+          Open Google TV
         </a>
       </motion.div>
     </motion.div>
