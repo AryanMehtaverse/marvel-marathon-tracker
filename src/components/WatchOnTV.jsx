@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Tv, Smartphone, ExternalLink } from 'lucide-react'
 
-// Google search URL — opens Google's streaming panel which has a direct
-// "Watch on Google TV" button. On Android with Google TV app installed,
-// tapping that button deep-links into the app.
+// Opens Play Store movie search on Android — Play Store is Google TV's catalog.
+// Tapping the movie there lands directly on the detail page shown in Google TV app.
 function googleTvUrl(title, year) {
-  const q = encodeURIComponent(`${title} ${year} watch on google tv`)
-  return `https://www.google.com/search?q=${q}`
+  const q = encodeURIComponent(`${title} ${year}`)
+  return `https://play.google.com/store/search?q=${q}&c=movies`
 }
 
 // QR code image via Google Charts API (no npm needed, no key needed)
@@ -113,7 +112,7 @@ function WatchModal({ entry, tvUrl, onClose }) {
 
           <div className="flex items-center gap-2 text-white/40 text-xs text-center">
             <Smartphone size={13} />
-            <span>Scan with your phone's camera to open Google TV</span>
+            <span>Scan → Play Store opens → tap the movie → Watch Now</span>
           </div>
         </div>
 
@@ -136,8 +135,7 @@ function WatchModal({ entry, tvUrl, onClose }) {
         </a>
 
         <p className="text-white/20 text-[10px] text-center mt-3 leading-relaxed">
-          Requires Google TV app installed on your phone.
-          Opens the search result directly.
+          Opens Play Store movie search on Android. Tap the movie → Watch Now → starts on your TV.
         </p>
       </motion.div>
     </motion.div>
