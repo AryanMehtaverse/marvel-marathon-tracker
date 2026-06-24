@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Play, Clock, CheckCircle2, Star, TrendingUp, Download, Upload, ChevronRight } from 'lucide-react'
+import { Play, Clock, CheckCircle2, Star, TrendingUp, Download, Upload } from 'lucide-react'
+import { WatchOnTVButton } from './WatchOnTV'
 import AnimatedCounter from './AnimatedCounter'
 import GoalTracker from './GoalTracker'
 import Milestones from './Milestones'
@@ -229,7 +230,7 @@ function ContinueWatching({ entries, onToggle }) {
                 )}
               </div>
             </div>
-            <Play size={14} className="text-white/20 group-hover:text-primary transition-colors flex-shrink-0" />
+            <WatchOnTVButton entry={entry} className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </motion.div>
         )
       })}

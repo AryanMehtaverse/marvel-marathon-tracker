@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle, Circle } from 'lucide-react'
 import GeneratedPoster from './GeneratedPoster'
+import { WatchOnTVButton } from './WatchOnTV'
 
 const UNIVERSE_COLORS = {
   MCU:               '#E62429',
@@ -113,6 +114,10 @@ export default function EntryCard({ entry, onToggle, posterUrl, index = 0 }) {
           >
             {entry.phase}
           </span>
+        </div>
+        {/* Watch on TV — shown on hover */}
+        <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          <WatchOnTVButton entry={entry} />
         </div>
       </div>
     </motion.div>
