@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Tv, Smartphone } from 'lucide-react'
 
-// Opens the Google TV app directly by package name — no URL matching needed
-const GOOGLE_TV_INTENT = 'intent://#Intent;package=com.google.android.videos;end'
+// Explicit MAIN/LAUNCHER action — required to actually open the app vs showing Play Store
+const GOOGLE_TV_INTENT = 'intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.videos;end'
 
 function isMobile() {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
